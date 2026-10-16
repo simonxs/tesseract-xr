@@ -6,13 +6,15 @@ An interactive way to explore the fourth dimension on the **Meta Quest 3 in AR (
 
 Version 3 · October 2026 · Live: https://tesseract-xr.okercode.de
 
+A non-commercial project driven by academic curiosity: how can the fourth dimension be made tangible? The visualizations are meant for learning and understanding.
+
 ![Multi-view of the 4D cube](docs/screenshot-multiview.png)
 
 ## Changes
 
 | Version | Contents |
 |---|---|
-| 3 | English version (picked from the browser language, switchable), new shape order: 3D cube, 4D cube, 3D sphere, 4D sphere, 3D car |
+| 3 | English version (picked from the browser language, switchable), new shape order: 3D cube, 4D cube, 3D sphere, 4D sphere, 3D car; three.js served locally (no third-party requests), legal links, MIT license |
 | 2 | Shape selection, unfold mode (cube → cross, tesseract → Dalí cross), edges as square beams, favicon |
 | 1 | Tesseract, multi-view, 6 rotary knobs, reference lines, legend and rotation matrix, grab and zoom |
 
@@ -20,7 +22,7 @@ Version 3 · October 2026 · Live: https://tesseract-xr.okercode.de
 
 ## Running it
 
-WebXR only works over **HTTPS** (or `localhost`). There is no build step: the folder is served as it is, and three.js is loaded from a CDN through an import map (jsDelivr, version 0.160.0).
+WebXR only works over **HTTPS** (or `localhost`). There is no build step: the folder is served as it is. three.js (version 0.160.0) is included in `vendor/three/` and loaded through an import map, so no data goes to third-party servers.
 
 | Where | How |
 |---|---|
@@ -149,7 +151,8 @@ Drag a knob with the mouse, click a vertex, drag the background to look around, 
 ## Code structure
 
 ```
-index.html              page, import map (three.js), favicons, desktop help
+index.html              page, import map, favicons, desktop help, legal links
+vendor/three/           three.js 0.160.0 (module build, ARButton, OrbitControls, LICENSE)
 favicon.svg/.ico, apple-touch-icon.png
 docs/                   screenshots for this README
 src/
@@ -237,4 +240,4 @@ renderer.render
 
 ## License
 
-[MIT](LICENSE) © 2026 Simon Schliecker. three.js is loaded from a CDN and is itself MIT-licensed.
+[MIT](LICENSE) © 2026 Simon Schliecker. three.js 0.160.0 is included in `vendor/three/` under its own MIT license; the app loads nothing from third-party servers.

@@ -6,13 +6,15 @@ Interaktive Darstellung der vierten Dimension für die **Meta Quest 3 im AR-Modu
 
 Version 3 · Stand Oktober 2026 · Live: https://tesseract-xr.okercode.de
 
+Ein nicht-kommerzielles Projekt aus akademischem Interesse: Wie lässt sich die vierte Dimension anschaulich machen? Die Darstellungen dienen dem Lernen und Verstehen.
+
 ![Rissansicht des 4D-Würfels](docs/screenshot-multiview.png)
 
 ## Änderungen
 
 | Version | Inhalt |
 |---|---|
-| 3 | Englische Sprachversion (automatisch nach Browsersprache, umschaltbar), neue Reihenfolge der Formen: 3D-Würfel, 4D-Würfel, 3D-Kugel, 4D-Kugel, 3D-Auto |
+| 3 | Englische Sprachversion (automatisch nach Browsersprache, umschaltbar), neue Reihenfolge der Formen: 3D-Würfel, 4D-Würfel, 3D-Kugel, 4D-Kugel, 3D-Auto; three.js lokal ausgeliefert (keine Anfragen an Dritte), Impressum-/Datenschutz-Links, MIT-Lizenz |
 | 2 | Formen-Auswahl (Tesseract, 3D-Würfel, 3D-Kugel, 4D-Kugel, Auto), Aufklapp-Modus (Würfel → Kreuz, Tesseract → Dalí-Kreuz), Kanten als 4-kantige Leisten, Favicon |
 | 1 | Tesseract, Rissansicht, 6 Drehknöpfe, Ordnungslinien, Legende und Drehmatrix, Greifen und Zoomen |
 
@@ -20,7 +22,7 @@ Version 3 · Stand Oktober 2026 · Live: https://tesseract-xr.okercode.de
 
 ## Starten
 
-WebXR läuft nur über **HTTPS** (oder `localhost`). Ein Build-Schritt ist nicht nötig. Der ganze Ordner wird so ausgeliefert, wie er ist; three.js kommt per Import-Map vom CDN (jsDelivr, Version 0.160.0).
+WebXR läuft nur über **HTTPS** (oder `localhost`). Ein Build-Schritt ist nicht nötig. Der ganze Ordner wird so ausgeliefert, wie er ist; three.js (Version 0.160.0) liegt unter `vendor/three/` und wird per Import-Map geladen, es gehen also keine Daten an fremde Server.
 
 | Weg | Vorgehen |
 |---|---|
@@ -152,7 +154,8 @@ In der Browser-Konsole steht `window.__tesseract` (state, views, setup, scene �
 ## Aufbau des Codes
 
 ```
-index.html              Seite, Import-Map (three.js), Favicons, Desktop-Hilfe
+index.html              Seite, Import-Map, Favicons, Desktop-Hilfe, Impressum-/Datenschutz-Links
+vendor/three/           three.js 0.160.0 (Modul, ARButton, OrbitControls, LICENSE)
 favicon.svg/.ico, apple-touch-icon.png
 src/
   config.js             alle Konstanten: Farben, Ebenen, Maße, Geschwindigkeiten, Kantenstil
@@ -238,4 +241,4 @@ Die Kommentare im Code sind auf Deutsch.
 
 ## Lizenz
 
-[MIT](LICENSE) © 2026 Simon Schliecker. three.js wird vom CDN geladen und steht selbst unter MIT-Lizenz.
+[MIT](LICENSE) © 2026 Simon Schliecker. three.js 0.160.0 liegt unter `vendor/three/` mit eigener MIT-Lizenz bei; die App lädt nichts von fremden Servern.

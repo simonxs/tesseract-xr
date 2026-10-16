@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Explore the fourth dimension in AR on Meta Quest 3: rotate a tesseract, compare multi-view projections and unfold it into the Dalí cross.">
 <title>Tesseract XR</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon.ico" sizes="32x32">
@@ -19,16 +20,21 @@
   body.xr #help { display: none; }
   #help p[lang] { display: none; }
   html[lang="de"] #help p[lang="de"], html[lang="en"] #help p[lang="en"] { display: block; }
+  #help footer span[lang] { display: none; }
+  html[lang="de"] #help footer span[lang="de"], html[lang="en"] #help footer span[lang="en"] { display: inline; }
   #lang { float: right; font-size: 13px; font-weight: 500; pointer-events: auto; }
   #lang a { color: #9ba6b8; text-decoration: none; padding: 2px 4px; border-radius: 4px; }
   #lang a.on { color: #0e1219; background: #ffc83d; }
-  #lang a:focus-visible { outline: 2px solid #ffc83d; }
+  #lang a:focus-visible, #help footer a:focus-visible { outline: 2px solid #ffc83d; }
+  #help p.about { margin-top: 8px; color: #c7cfdb; }
+  #help footer { margin-top: 8px; font-size: 12.5px; color: #6f7a8c; pointer-events: auto; }
+  #help footer a { color: #9ba6b8; }
 </style>
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    "three": "./vendor/three/three.module.js",
+    "three/addons/": "./vendor/three/addons/"
   }
 }
 </script>
@@ -43,6 +49,12 @@
   <p lang="en">On Quest 3, tap “Start AR” below. On desktop: drag a knob, click a vertex, drag the background to look around.
   Keys: <kbd>S</kbd> shape, <kbd>V</kbd> view, <kbd>1</kbd>–<kbd>6</kbd> plane, <kbd>←</kbd><kbd>→</kbd> rotate/fold,
   <kbd>Space</kbd> auto, <kbd>P</kbd> projection, <kbd>R</kbd> reset, <kbd>C</kbd> clear selection.</p>
+  <p lang="de" class="about">Ein nicht-kommerzielles Projekt aus akademischem Interesse: Wie lässt sich die vierte Dimension anschaulich machen? Die Darstellungen dienen dem Lernen und Verstehen.</p>
+  <p lang="en" class="about">A non-commercial project driven by academic curiosity: how can the fourth dimension be made tangible? The visualizations are meant for learning and understanding.</p>
+  <footer>
+    <span lang="de"><a href="https://okercode.de/#impressum" target="_blank" rel="noopener">Impressum</a> · <a href="https://okercode.de/datenschutz.php" target="_blank" rel="noopener">Datenschutz</a> · <a href="https://github.com/simonxs/tesseract-xr" target="_blank" rel="noopener">Quellcode (MIT)</a></span>
+    <span lang="en"><a href="https://okercode.de/#impressum" target="_blank" rel="noopener">Legal notice</a> · <a href="https://okercode.de/datenschutz.php" target="_blank" rel="noopener">Privacy</a> · <a href="https://github.com/simonxs/tesseract-xr" target="_blank" rel="noopener">Source code (MIT)</a></span>
+  </footer>
 </div>
 <script type="module" src="./src/main.js"></script>
 </body>
