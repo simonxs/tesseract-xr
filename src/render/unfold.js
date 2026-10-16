@@ -16,6 +16,7 @@ import { applyMat, projectCenter } from '../core/math4d.js';
 import { ROLE_COLORS, EDGE_RADIUS, VERTEX_RADIUS, VERTEX_COLOR } from '../config.js';
 import { SegmentBatch, PointBatch, QuadFill } from './batches.js';
 import { CanvasPanel, richText, FONT, UI } from '../ui/canvasPanel.js';
+import { t } from '../i18n.js';
 
 const ROLE = Object.fromEntries(Object.entries(ROLE_COLORS).map(([k, v]) => [k, new THREE.Color(v)]));
 const V_COL = new THREE.Color(VERTEX_COLOR);
@@ -124,9 +125,9 @@ export class UnfoldScene {
     this.tFill = new QuadFill(T_CELLS.length * 6, 0.13);
     this.tess.add(this.tEdges.mesh, this.tPoints.mesh, this.tFill.mesh);
     const tl = label([
-      [{ t: 'Tesseract → 8 Würfel' }],
-      [{ t: '1 Boden', c: '#a9b2c2' }, { t: ' + ', c: UI.dim }, { t: '6 Wände', c: '#5aaeff' },
-        { t: ' + ', c: UI.dim }, { t: '1 Deckel', c: '#ffc83d' }],
+      [{ t: t('unf.tess') }],
+      [{ t: t('unf.base'), c: '#a9b2c2' }, { t: ' + ', c: UI.dim }, { t: t('unf.walls6'), c: '#5aaeff' },
+        { t: ' + ', c: UI.dim }, { t: t('unf.lid'), c: '#ffc83d' }],
     ], 6.4);
     tl.position.set(0, 4.3, 0);
     this.tess.add(tl);
@@ -147,14 +148,14 @@ export class UnfoldScene {
     sheet.position.set(0, -1.03, -1);
     this.cube.add(sheet, this.cEdges.mesh, this.cPoints.mesh, this.cFill.mesh, this.sEdges.mesh, this.sFill.mesh);
     const cl = label([
-      [{ t: 'Würfel → 6 Quadrate' }],
-      [{ t: '1 Boden', c: '#a9b2c2' }, { t: ' + ', c: UI.dim }, { t: '4 Wände', c: '#5aaeff' },
-        { t: ' + ', c: UI.dim }, { t: '1 Deckel', c: '#ffc83d' }],
+      [{ t: t('unf.cube') }],
+      [{ t: t('unf.base'), c: '#a9b2c2' }, { t: ' + ', c: UI.dim }, { t: t('unf.walls4'), c: '#5aaeff' },
+        { t: ' + ', c: UI.dim }, { t: t('unf.lid'), c: '#ffc83d' }],
     ], 6.4);
     cl.position.set(0, 3.0, -1);
     const sl = label([
-      [{ t: 'Blatt = Welt des Flachländers', f: `600 38px ${FONT}` }],
-      [{ t: 'Dunkel: sein Bild, der Schatten des Würfels', c: UI.dim }],
+      [{ t: t('unf.sheet'), f: `600 38px ${FONT}` }],
+      [{ t: t('unf.shadow'), c: UI.dim }],
     ], 6.4);
     sl.position.set(0, -1.6, 4.4);
     this.cube.add(cl, sl);
@@ -170,7 +171,7 @@ export class UnfoldScene {
 
   update(state) {
     const [A, B] = foldAngles(state.unfold);
-    const t = state.easedBlend, d = Math.max(state.perspDist, 5), M = state.M;
+    const blend = state.easedBlend, d = Math.max(state.perspDist, 5), M = state.M;
     const er = EDGE_RADIUS, vr = VERTEX_RADIUS * 0.7;
 
     // Tesseract-Zellen: 4D-Punkte → Drehung (nur 3D-Knöpfe aktiv) → Projektion
@@ -180,7 +181,7 @@ export class UnfoldScene {
       CUBE_L.forEach((l, i) => {
         cell.f(l, A, B, this._p4);
         applyMat(M, this._p4, this._r4);
-        projectCenter(this._r4, t, d, this.tc[i]);
+        projectCenter(this._r4, blend, d, this.tc[i]);
       });
       const cen = this.cellCenter(this.tc);
       for (const [i, j] of CUBE_E) this.tEdges.add(this.tc[i], this.tc[j], er, col, cen);

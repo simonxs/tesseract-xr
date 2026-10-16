@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { AXES, AXIS_CSS, SEL_CSS, MAX_SELECTION } from '../config.js';
 import { fmt } from '../core/math4d.js';
 import { CanvasPanel, panelBg, richText, FONT } from './canvasPanel.js';
+import { t } from '../i18n.js';
 
 const _p = new THREE.Vector3();
 
@@ -29,7 +30,7 @@ export class VertexLabels {
       p.drawIfChanged(`${state.version}|${state.shapeId}|${i}|${k}`, (ctx, w, h) => {
         panelBg(ctx, w, h, 20);
         ctx.textBaseline = 'middle';
-        richText(ctx, [{ t: `● Ecke ${state.shape.vertexName(i)}`, c: SEL_CSS[k] }], 24, 34, 'left', `600 26px ${FONT}`);
+        richText(ctx, [{ t: `● ${t('vertex')} ${state.shape.vertexName(i)}`, c: SEL_CSS[k] }], 24, 34, 'left', `600 26px ${FONT}`);
         const segs = [];
         for (let a = 0; a < 4; a++) {
           segs.push({ t: AXES[a].toLowerCase() + ' ', c: AXIS_CSS[a], f: `700 25px ${FONT}` });

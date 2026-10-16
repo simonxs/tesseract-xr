@@ -2,6 +2,7 @@
 // In der Ansicht "ohne X" (und Y, Z) ist er deshalb in Ruhe platt.
 
 import { AXIS_COL, signs } from './common.js';
+import { t } from '../i18n.js';
 
 const vertices = Array.from({ length: 8 }, (_, i) => [0, 1, 2].map((b) => ((i >> b) & 1 ? 1 : -1)).concat(0));
 const edges = [];
@@ -14,7 +15,7 @@ for (let i = 0; i < 8; i++) {
 
 export const cube3d = {
   id: 'cube3d',
-  label: '3D-Würfel',
+  get label() { return t('shape.cube3d'); },
   vertices,
   edges,
   edgeScale: 1,
@@ -22,5 +23,5 @@ export const cube3d = {
   selectable: true,
   unfold: true,
   vertexName: (i) => signs(vertices[i], 3),
-  hint: 'liegt flach bei w = 0',
+  get hint() { return t('hint.cube3d'); },
 };

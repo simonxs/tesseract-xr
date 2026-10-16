@@ -10,6 +10,7 @@ import { PLANES, AXES, AXIS_COLORS, AXIS_CSS, VIEW_MODES, ROLE_COLORS } from '..
 import { SHAPES } from '../shapes/index.js';
 import { fmtDeg } from '../core/math4d.js';
 import { CanvasPanel, panelBg, richText, FONT, UI } from './canvasPanel.js';
+import { t } from '../i18n.js';
 
 const PX_W = 1024, PX_H = 660, WORLD_W = 0.44;
 const R = 58; // Knopfradius in Pixeln
@@ -21,7 +22,7 @@ const KNOBS = [
   { plane: 'fold', x: 310, y: ROW1 },
 ];
 const SHAPE_CHIPS = SHAPES.map((s, k) => ({ group: 'shape', id: s.id, label: s.label, x: 150 + k * 174, y: 22, w: 166, h: 52 }));
-const VIEW_CHIPS = VIEW_MODES.map((v, k) => ({ group: 'view', id: v.id, label: v.label, x: 150 + k * 228, y: 86, w: 220, h: 52 }));
+const VIEW_CHIPS = VIEW_MODES.map((v, k) => ({ group: 'view', id: v.id, label: t(`view.${v.id}`), x: 150 + k * 228, y: 86, w: 220, h: 52 }));
 const CHIPS = [...SHAPE_CHIPS, ...VIEW_CHIPS];
 const BTN_X = 660, BTN_W = 332, BTN_H = 76;
 
@@ -39,10 +40,10 @@ export class Pult {
 
     const s = state;
     this.buttons = [
-      { id: 'auto', label: () => (s.viewMode === 'unfold' ? `Auto-Falten: ${s.auto ? 'an' : 'aus'}` : `Auto-Rotation: ${s.auto ? 'an' : 'aus'}`), on: () => s.auto },
-      { id: 'reset', label: () => 'Zurücksetzen' },
-      { id: 'proj', label: () => `Zentrum: ${s.perspective ? 'perspektivisch' : 'orthogonal'}` },
-      { id: 'clear', label: () => `Auswahl löschen (${s.selection.length})`, enabled: () => s.shape.selectable && s.viewMode !== 'unfold' },
+      { id: 'auto', label: () => t(s.viewMode === 'unfold' ? 'btn.autoFold' : 'btn.autoRot', { s: t(s.auto ? 'on' : 'off') }), on: () => s.auto },
+      { id: 'reset', label: () => t('btn.reset') },
+      { id: 'proj', label: () => t('btn.center', { m: t(s.perspective ? 'persp' : 'ortho') }) },
+      { id: 'clear', label: () => t('btn.clear', { n: s.selection.length }), enabled: () => s.shape.selectable && s.viewMode !== 'unfold' },
     ].map((b, k) => ({ ...b, x: BTN_X, y: 176 + k * 94, w: BTN_W, h: BTN_H }));
 
     // 3D-Knöpfe
@@ -113,18 +114,18 @@ export class Pult {
   }
 
   /** Klick auf Chip oder Schaltfläche */
-  action(t) {
+  action(hit) {
     const s = this.state;
-    if (t.type === 'chip') {
-      if (t.group === 'shape') s.setShape(t.id);
-      else s.setViewMode(t.id); // meldet selbst, wenn es nicht geht
+    if (hit.type === 'chip') {
+      if (hit.group === 'shape') s.setShape(hit.id);
+      else s.setViewMode(hit.id); // meldet selbst, wenn es nicht geht
       return;
     }
-    if (t.enabled === false) return;
-    if (t.id === 'auto') s.toggleAuto();
-    else if (t.id === 'reset') { s.reset(); if (s.viewMode === 'unfold') s.turnFold(-1); }
-    else if (t.id === 'proj') s.togglePerspective();
-    else if (t.id === 'clear') s.clearSelection();
+    if (hit.enabled === false) return;
+    if (hit.id === 'auto') s.toggleAuto();
+    else if (hit.id === 'reset') { s.reset(); if (s.viewMode === 'unfold') s.turnFold(-1); }
+    else if (hit.id === 'proj') s.togglePerspective();
+    else if (hit.id === 'clear') s.clearSelection();
   }
 
   update(hover) {
@@ -147,8 +148,8 @@ export class Pult {
     ctx.textAlign = 'left';
     ctx.font = `600 22px ${FONT}`;
     ctx.fillStyle = UI.dim;
-    ctx.fillText('FORM', 34, 48);
-    ctx.fillText('ANSICHT', 34, 112);
+    ctx.fillText(t('pult.shape'), 34, 48);
+    ctx.fillText(t('pult.view'), 34, 112);
     for (const c of CHIPS) {
       const active = this.chipActive(c), enabled = this.chipEnabled(c);
       const hov = hover?.type === 'chip' && hover.group === c.group && hover.id === c.id;
@@ -174,8 +175,8 @@ export class Pult {
     ctx.textAlign = 'left';
     ctx.font = `600 25px ${FONT}`;
     ctx.fillStyle = UI.dim;
-    ctx.fillText('3D-DREHUNGEN  ·  wie gewohnt', 34, 186);
-    ctx.fillText(unfold ? 'FALTEN  ·  Würfel und Tesseract gemeinsam' : '4D-DREHUNGEN  ·  in die 4. Dimension', 34, 430);
+    ctx.fillText(t('pult.row3d'), 34, 186);
+    ctx.fillText(t(unfold ? 'pult.rowFold' : 'pult.row4d'), 34, 430);
 
     for (const k of this.knobs) {
       if (!this.knobVisible(k)) continue;
@@ -190,25 +191,25 @@ export class Pult {
       ctx.strokeStyle = 'rgba(255,255,255,0.28)';
       ctx.lineWidth = 3;
       const ticks = k.plane === 'fold' ? 6 : 12;
-      for (let t = 0; t <= ticks; t++) {
-        const an = k.plane === 'fold' ? (t / ticks) * Math.PI : (t / ticks) * Math.PI * 2;
+      for (let n = 0; n <= ticks; n++) {
+        const an = k.plane === 'fold' ? (n / ticks) * Math.PI : (n / ticks) * Math.PI * 2;
         ctx.beginPath();
         ctx.moveTo(k.x + Math.sin(an) * (R + 8), k.y - Math.cos(an) * (R + 8));
         ctx.lineTo(k.x + Math.sin(an) * (R + 15), k.y - Math.cos(an) * (R + 15));
         ctx.stroke();
       }
       if (k.plane === 'fold') {
-        richText(ctx, [{ t: 'Aufklappen', c: UI.text }], k.x, k.y + R + 30, 'center', `700 30px ${FONT}`);
+        richText(ctx, [{ t: t('fold.knob'), c: UI.text }], k.x, k.y + R + 30, 'center', `700 30px ${FONT}`);
         richText(ctx, [
-          { t: `${Math.round(s.unfold * 100)} % offen`, c: UI.text },
-          { t: '  ·  rechts drehen = auf', c: UI.dim },
+          { t: t('fold.open', { pct: Math.round(s.unfold * 100) }), c: UI.text },
+          { t: `  ·  ${t('fold.hint')}`, c: UI.dim },
         ], k.x, k.y + R + 58, 'center', `500 22px ${FONT}`);
         continue;
       }
       const p = PLANES[k.plane];
       richText(ctx, [{ t: AXES[p.a], c: AXIS_CSS[p.a] }, { t: AXES[p.b], c: AXIS_CSS[p.b] }],
         k.x, k.y + R + 30, 'center', `700 32px ${FONT}`);
-      richText(ctx, [{ t: fmtDeg(s.knobAngles[k.plane]), c: UI.text }, { t: `  ·  fest: ${p.fixed}`, c: UI.dim }],
+      richText(ctx, [{ t: fmtDeg(s.knobAngles[k.plane]), c: UI.text }, { t: `  ·  ${t('knob.fixed', { p: p.fixed })}`, c: UI.dim }],
         k.x, k.y + R + 58, 'center', `500 22px ${FONT}`);
     }
 

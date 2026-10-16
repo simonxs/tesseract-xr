@@ -4,6 +4,7 @@
 import { AXES, AXIS_CSS, SEL_CSS, ROLE_CSS } from '../config.js';
 import { fmt } from '../core/math4d.js';
 import { CanvasPanel, panelBg, richText, FONT, UI } from './canvasPanel.js';
+import { t } from '../i18n.js';
 
 export class InfoPanel {
   constructor() {
@@ -21,14 +22,14 @@ export class InfoPanel {
     ctx.textAlign = 'left';
     ctx.font = `600 22px ${FONT}`;
     ctx.fillStyle = UI.dim;
-    ctx.fillText('LEGENDE', 32, 40);
+    ctx.fillText(t('info.legend'), 32, 40);
 
     if (state.viewMode === 'unfold') this.legendUnfold(ctx);
     else this.legendAxes(ctx, state);
 
     ctx.font = `600 22px ${FONT}`;
     ctx.fillStyle = UI.dim;
-    ctx.fillText('ORIENTIERUNG  ·  Drehmatrix', 32, 330);
+    ctx.fillText(t('info.orient'), 32, 330);
 
     const x0 = 110, cw = 92, y0 = 372, ch = 54;
     for (let c = 0; c < 4; c++) {
@@ -57,8 +58,8 @@ export class InfoPanel {
     ctx.textAlign = 'left';
     ctx.font = `500 20px ${FONT}`;
     ctx.fillStyle = UI.dim;
-    ctx.fillText('Spalte = wohin die ursprüngliche', 32, 622);
-    ctx.fillText('Achse jetzt zeigt', 32, 650);
+    ctx.fillText(t('info.col1'), 32, 622);
+    ctx.fillText(t('info.col2'), 32, 650);
   }
 
   legendAxes(ctx, state) {
@@ -71,21 +72,21 @@ export class InfoPanel {
       ctx.moveTo(36, y);
       ctx.lineTo(86, y);
       ctx.stroke();
-      richText(ctx, [{ t: AXES[a], c: AXIS_CSS[a], f: `700 26px ${FONT}` }, { t: '-Richtung' }],
+      richText(ctx, [{ t: AXES[a], c: AXIS_CSS[a], f: `700 26px ${FONT}` }, { t: t('info.dir') }],
         104, y, 'left', `500 24px ${FONT}`);
     }
     ctx.font = `500 22px ${FONT}`;
     ctx.fillStyle = UI.text;
-    ctx.fillText('Dicke Kante = näher in W', 36, 248);
+    ctx.fillText(t('info.thick'), 36, 248);
     if (state.shape.selectable) {
-      richText(ctx, [{ t: 'Markierte Ecken: ' }, ...SEL_CSS.map((c) => ({ t: '● ', c }))], 36, 282, 'left', `500 22px ${FONT}`);
+      richText(ctx, [{ t: t('info.marked') }, ...SEL_CSS.map((c) => ({ t: '● ', c }))], 36, 282, 'left', `500 22px ${FONT}`);
     } else {
       richText(ctx, [{ t: state.shape.hint, c: UI.dim }], 36, 282, 'left', `500 20px ${FONT}`);
     }
   }
 
   legendUnfold(ctx) {
-    const rows = [['base', 'Boden'], ['wall', 'Wände'], ['lid', 'Deckel']];
+    const rows = ['base', 'wall', 'lid'].map((r) => [r, t(`role.${r}`)]);
     rows.forEach(([role, name], k) => {
       const y = 82 + k * 38;
       ctx.fillStyle = ROLE_CSS[role];
@@ -94,9 +95,9 @@ export class InfoPanel {
     });
     ctx.font = `500 22px ${FONT}`;
     ctx.fillStyle = UI.text;
-    ctx.fillText('Würfel:  1 + 4 + 1 = 6 Quadrate', 36, 210);
-    ctx.fillText('Tesseract:  1 + 6 + 1 = 8 Würfel', 36, 244);
+    ctx.fillText(t('info.cubeSum'), 36, 210);
+    ctx.fillText(t('info.tessSum'), 36, 244);
     ctx.fillStyle = UI.dim;
-    ctx.fillText('Wände klappen in die W-Richtung', 36, 282);
+    ctx.fillText(t('info.wallsW'), 36, 282);
   }
 }

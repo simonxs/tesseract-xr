@@ -17,6 +17,12 @@
   #help p { margin: 0; color: #9ba6b8; font-size: 13.5px; }
   #help kbd { font: 12px ui-monospace, monospace; background: rgba(255,255,255,.1); border-radius: 4px; padding: 0 4px; color: #e9edf3; }
   body.xr #help { display: none; }
+  #help p[lang] { display: none; }
+  html[lang="de"] #help p[lang="de"], html[lang="en"] #help p[lang="en"] { display: block; }
+  #lang { float: right; font-size: 13px; font-weight: 500; pointer-events: auto; }
+  #lang a { color: #9ba6b8; text-decoration: none; padding: 2px 4px; border-radius: 4px; }
+  #lang a.on { color: #0e1219; background: #ffc83d; }
+  #lang a:focus-visible { outline: 2px solid #ffc83d; }
 </style>
 <script type="importmap">
 {
@@ -30,10 +36,13 @@
 <body>
 <div id="app"></div>
 <div id="help">
-  <h1>Tesseract XR</h1>
-  <p>Auf der Quest 3 unten „Start AR“ antippen. Am Desktop: Knopf ziehen, Ecke klicken, Hintergrund ziehen zum Umsehen.
+  <h1>Tesseract XR <span id="lang"><a href="?lang=de" data-l="de">DE</a> · <a href="?lang=en" data-l="en">EN</a></span></h1>
+  <p lang="de">Auf der Quest 3 unten „Start AR“ antippen. Am Desktop: Knopf ziehen, Ecke klicken, Hintergrund ziehen zum Umsehen.
   Tasten: <kbd>S</kbd> Form, <kbd>V</kbd> Ansicht, <kbd>1</kbd>–<kbd>6</kbd> Ebene, <kbd>←</kbd><kbd>→</kbd> drehen/falten,
   <kbd>Leertaste</kbd> Auto, <kbd>P</kbd> Projektion, <kbd>R</kbd> Reset, <kbd>C</kbd> Auswahl löschen.</p>
+  <p lang="en">On Quest 3, tap “Start AR” below. On desktop: drag a knob, click a vertex, drag the background to look around.
+  Keys: <kbd>S</kbd> shape, <kbd>V</kbd> view, <kbd>1</kbd>–<kbd>6</kbd> plane, <kbd>←</kbd><kbd>→</kbd> rotate/fold,
+  <kbd>Space</kbd> auto, <kbd>P</kbd> projection, <kbd>R</kbd> reset, <kbd>C</kbd> clear selection.</p>
 </div>
 <script type="module" src="./src/main.js"></script>
 </body>

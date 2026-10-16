@@ -14,6 +14,11 @@ import { StatusLine } from './ui/statusLine.js';
 import { InfoPanel } from './ui/infoPanel.js';
 import { VertexLabels } from './ui/vertexLabels.js';
 import { Interaction } from './input/interaction.js';
+import { LANG } from './i18n.js';
+
+// Sprache für Hilfe-Text und Umschalter auf der Seite
+document.documentElement.lang = LANG;
+document.querySelectorAll('#lang a').forEach((a) => a.classList.toggle('on', a.dataset.l === LANG));
 
 // ---------- Renderer & Szene ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });

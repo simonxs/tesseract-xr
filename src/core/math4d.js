@@ -1,4 +1,5 @@
 // 4D-Mathematik ohne Three.js-Abhängigkeit.
+import { DECIMAL } from '../i18n.js';
 // Matrizen sind flache Arrays mit 16 Einträgen, zeilenweise: m[zeile * 4 + spalte].
 // Spalte c = Bild der ursprünglichen Achse c (wohin X, Y, Z, W jetzt zeigen).
 
@@ -61,10 +62,10 @@ export function nearness(w) {
   return 1 + 0.25 * w; // w in [-2, 2] → 0.5 … 1.5
 }
 
-/** Zahl im deutschen Format mit Vorzeichen: +0,71 / −1,00 */
+/** Zahl mit Vorzeichen im Format der Sprache: +0,71 (de) bzw. +0.71 (en) */
 export function fmt(v, digits = 2) {
-  if (Math.abs(v) < 0.5 * 10 ** -digits) return ' ' + (0).toFixed(digits).replace('.', ',');
-  return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(digits).replace('.', ',');
+  if (Math.abs(v) < 0.5 * 10 ** -digits) return ' ' + (0).toFixed(digits).replace('.', DECIMAL);
+  return (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(digits).replace('.', DECIMAL);
 }
 
 /** Winkel (rad) → "+37°", gefaltet auf (−180°, 180°] */

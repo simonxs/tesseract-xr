@@ -1,222 +1,234 @@
 # Tesseract XR
 
-Interaktive Darstellung der vierten Dimension für die **Meta Quest 3 im AR-Modus (Passthrough)**, gebaut mit WebXR und three.js. Man dreht 4D-Formen mit Drehknöpfen in den 6 Ebenen des 4D-Raums, sieht sie in einer **Rissansicht** wie auf einem Bauplan und kann den Tesseract wie einen Würfel **aufklappen**.
+**English** · [Deutsch](README.de.md)
 
-Version 2 · Stand Oktober 2026 · Live: https://tesseract-xr.okercode.de
+An interactive way to explore the fourth dimension on the **Meta Quest 3 in AR (passthrough) mode**, built with WebXR and three.js. You turn 4D shapes with rotary knobs in the 6 planes of 4D space, see them in a **multi-view projection** like an engineering drawing, and can **unfold** the tesseract the way you unfold a cube.
 
-## Änderungen
+Version 3 · October 2026 · Live: https://tesseract-xr.okercode.de
 
-| Version | Inhalt |
+![Multi-view of the 4D cube](docs/screenshot-multiview.png)
+
+## Changes
+
+| Version | Contents |
 |---|---|
-| 2 | Formen-Auswahl (Tesseract, 3D-Würfel, 3D-Kugel, 4D-Kugel, Auto), Aufklapp-Modus (Würfel → Kreuz, Tesseract → Dalí-Kreuz), Kanten als 4-kantige Leisten, Favicon |
-| 1 | Tesseract, Rissansicht, 6 Drehknöpfe, Ordnungslinien, Legende und Drehmatrix, Greifen und Zoomen |
+| 3 | English version (picked from the browser language, switchable), new shape order: 3D cube, 4D cube, 3D sphere, 4D sphere, 3D car |
+| 2 | Shape selection, unfold mode (cube → cross, tesseract → Dalí cross), edges as square beams, favicon |
+| 1 | Tesseract, multi-view, 6 rotary knobs, reference lines, legend and rotation matrix, grab and zoom |
 
 ---
 
-## Starten
+## Running it
 
-WebXR läuft nur über **HTTPS** (oder `localhost`). Ein Build-Schritt ist nicht nötig. Der ganze Ordner wird so ausgeliefert, wie er ist; three.js kommt per Import-Map vom CDN (jsDelivr, Version 0.160.0).
+WebXR only works over **HTTPS** (or `localhost`). There is no build step: the folder is served as it is, and three.js is loaded from a CDN through an import map (jsDelivr, version 0.160.0).
 
-| Weg | Vorgehen |
+| Where | How |
 |---|---|
-| Lokal am PC testen | `python3 -m http.server 8000` im Projektordner, dann `http://localhost:8000` öffnen |
-| Quest 3 | Ordner auf einen HTTPS-Webserver legen, Adresse im **Meta Quest Browser** öffnen, „Start AR“ antippen |
-| Eigener Server (Plesk) | Plesk-Git-Erweiterung mit Deploy-Key und Webhook: jeder Push auf `main` wird automatisch ausgeliefert |
-| Quest per USB, ohne Server | `adb reverse tcp:8000 tcp:8000`, dann auf der Brille `http://localhost:8000` öffnen (localhost gilt als sicher) |
+| Desktop, for testing | run `python3 -m http.server 8000` in the project folder, open `http://localhost:8000` |
+| Quest 3 | put the folder on an HTTPS web server, open the address in the **Meta Quest Browser**, tap “Start AR” |
+| Quest over USB, no server | `adb reverse tcp:8000 tcp:8000`, then open `http://localhost:8000` in the headset (localhost counts as secure) |
 
-Einfach die `index.html` per Doppelklick zu öffnen funktioniert nicht, weil ES-Module über `file://` blockiert werden.
+Double-clicking `index.html` does not work, because browsers block ES modules on `file://`.
+
+**Language:** German for German browsers, English otherwise. Switch with `?lang=en` or `?lang=de` in the address, or with “DE · EN” on the start page (before entering AR). The choice is remembered in the browser.
 
 ---
 
-## Was man sieht
+## What you see
 
-Am Pult wählt man oben in der Kopfzeile **Form** und **Ansicht**. Nicht jede Kombination ist sinnvoll; ausgegraute Felder erklären in der Statuszeile, warum.
+The header of the control desk has two rows: **Shape** and **View**. Not every combination makes sense; greyed-out options explain why in the status line.
 
-| Form | Rissansicht | nur Form | Aufklappen | Was man daran lernt |
+| Shape | Multi-view | Shape only | Unfold | What it teaches |
 |---|---|---|---|---|
-| Tesseract | ✓ | ✓ | ✓ | Grundform, Drehebenen, Würfel im Würfel |
-| 3D-Würfel (bei w = 0) | ✓ | ✓ | ✓ | Ein 3D-Objekt ist im 4D-Raum flach: in „ohne X/Y/Z“ in Ruhe platt |
-| 3D-Kugel (bei w = 0) | ✓ | ✓ | – | wird bei XW zur Scheibe; nach 180° unverändert, weil sie ihr eigenes Spiegelbild ist |
-| 4D-Kugel | ✓ | ✓ | – | ein Großkreis pro Drehebene: der Kreis der aktiven Ebene kreist in sich, der Kreis der festen Ebene steht still |
-| Auto (bei w = 0) | ✓ | ✓ | – | **nach 180° in XW gespiegelt**: Lenkrad rechts, Kennzeichen spiegelverkehrt |
+| 3D cube (at w = 0) | ✓ | ✓ | ✓ | A 3D object is flat in 4D space: at rest it is squashed flat in “without X/Y/Z” |
+| 4D cube (tesseract) | ✓ | ✓ | ✓ | The basic shape, rotation planes, cube within a cube |
+| 3D sphere (at w = 0) | ✓ | ✓ | – | Turns into a disc in XW; after 180° it looks unchanged, because a sphere is its own mirror image |
+| 4D sphere | ✓ | ✓ | – | One great circle per rotation plane: the circle of the active plane spins in place, the circle of the fixed plane stands still |
+| 3D car (at w = 0) | ✓ | ✓ | – | **Mirrored after 180° in XW**: steering wheel on the right, licence plate reversed |
 
-### Kanten als Leisten
+### Unfold
 
-Kanten sind 4-kantige Leisten statt runder Rohre. Jede Leiste ist so gedreht, dass eine flache Seite vom Mittelpunkt ihrer Ansicht weg zeigt. Dadurch wirken die verzerrten Würfel wie Rahmen, und das Licht fällt auf jede Seite anders. Umschalten in `config.js`: `EDGE_STYLE = 'beam' | 'tube'`.
+![Unfolding cube and tesseract](docs/screenshot-unfold.png)
 
-### Aufklappen
+On the left, a 3D cube unfolds on a **sheet of paper** into 6 squares. Its **shadow** lies on the sheet: that is all a Flatlander can see. On the right, the tesseract unfolds the same way into **8 cubes** (the Dalí cross). Both are driven by the same **fold knob**, which replaces the row of 4D knobs in this mode.
 
-Links ein 3D-Würfel, der sich auf einem **Blatt Papier** zu 6 Quadraten aufklappt. Auf dem Blatt liegt sein **Schatten**: das, was ein Flachländer sieht. Rechts klappt sich der Tesseract genauso zu **8 Würfeln** auf (Dalí-Kreuz). Beide hängen am selben **Falt-Knopf**, der im Aufklapp-Modus die Reihe der 4D-Knöpfe ersetzt.
-
-| Rolle | Würfel | Tesseract | Farbe |
+| Role | Cube | Tesseract | Color |
 |---|---|---|---|
-| Boden | 1 Quadrat | 1 Würfel | Grau |
-| Wände | 4 Quadrate | 6 Würfel | Blau |
-| Deckel | 1, an der hinteren Wand | 1, an der unteren Wand | Gold |
+| Base | 1 square | 1 cube | grey |
+| Walls | 4 squares | 6 cubes | blue |
+| Lid | 1, on the back wall | 1, on the bottom wall | gold |
 
-Jede Wand dreht sich um 90° um die Fläche, die sie mit dem Boden teilt: beim Würfel in die Höhe, beim Tesseract in die W-Richtung. Beim Zuklappen klappt zuerst der Deckel hoch, dann die Wände. Zugeklappt sieht man den bekannten Würfel im Würfel; beim Würfel zeigt der Schatten dazu passend ein Quadrat im Quadrat. Beim Wechsel in den Aufklapp-Modus wird die 4D-Lage zurückgesetzt; die 3D-Knöpfe drehen nur das Dalí-Kreuz.
+Each wall turns 90° about the face it shares with the base: upwards for the cube, into the W direction for the tesseract. When closing, the lid folds up first, then the walls. Fully closed you see the familiar cube within a cube, and the cube’s shadow shows the matching square within a square. Entering unfold mode resets the 4D orientation; the 3D knobs only turn the Dalí cross.
 
-### Rissansicht (Standard)
+### Multi-view (default)
 
-Die Logik stammt aus der Dreitafelprojektion: **Jede Ansicht lässt eine Achse weg und liegt entlang genau dieser Achse versetzt.**
+The idea comes from orthographic multi-view drawings: **each view drops one axis and is offset along exactly that axis.**
 
-| Darstellung | Position | zeigt | Besonderheit |
+| View | Position | Shows | Notes |
 |---|---|---|---|
-| Zentrum | Mitte | X Y Z | umschaltbar: **perspektivisch** (Würfel im Würfel, 4D-Kamera auf der W-Achse) oder **orthogonal** („ohne W“) |
-| ohne X | rechts | W Y Z | W liegt auf der X-Richtung |
-| ohne Y | oben | X W Z | W liegt auf der Y-Richtung |
-| ohne Z | hinten | X Y W | W liegt auf der Z-Richtung (zum Ansehen um den Aufbau herumgehen oder ihn drehen) |
+| Center | middle | X Y Z | switchable: **perspective** (cube within a cube, 4D camera on the W axis) or **orthographic** (“without W”) |
+| without X | right | W Y Z | W lies along the X direction |
+| without Y | top | X W Z | W lies along the Y direction |
+| without Z | behind | X Y W | W lies along the Z direction (walk around or turn the setup to see it) |
 
-Die Seitenansichten sind immer orthogonal. Bei 0° zeigt jede Ansicht einfach einen Würfel, denn die Kanten der fehlenden Achse fallen zu Punkten zusammen. Es ist wie beim Grundriss eines Würfels, auf dem die senkrechten Kanten unsichtbar sind.
+The side views are always orthographic. At 0° every view simply shows a cube, because the edges of the missing axis collapse to points, just as the vertical edges of a cube disappear in its floor plan.
 
-### Farben
+### Colors and edges
 
-| Element | Bedeutung |
+| Element | Meaning |
 |---|---|
-| Rot / Grün / Blau / Magenta | Kante parallel zu X / Y / Z / W (je 8 Stück) |
-| Kantendicke | näher in W = dicker |
-| Gold / Türkis / Weiß | markierte Ecken 1–3 |
-| Magenta-Bögen | Viertelkreise, die die W-Koordinate zwischen Seitenansichten übertragen |
-| Rahmenfarbe einer Seitenansicht | die Achse, die dort fehlt |
+| red / green / blue / magenta | edge parallel to X / Y / Z / W |
+| edge thickness | closer in W = thicker |
+| gold / teal / white | marked vertices 1–3 |
+| magenta arcs | quarter circles that carry the W coordinate between side views |
+| frame color of a side view | the axis missing there |
 
-### Ordnungslinien
+Edges are square beams rather than round tubes. Each beam is rolled so that one flat side faces away from the center of its view, which makes distorted cubes read as frames. Switch in `config.js`: `EDGE_STYLE = 'beam' | 'tube'`.
 
-Tippt man eine Ecke an, wird sie in allen Ansichten markiert und verbunden:
-- **Zentrum ↔ Seitenansicht:** gerade Linie. Im orthogonalen Zentrum ist sie achsparallel, weil beide Ansichten zwei Koordinaten teilen.
-- **Seitenansicht ↔ Seitenansicht:** gerade Linie bis zur Versatz-Ebene, dann ein **Viertelkreis** und wieder gerade. Das ist die klassische Konstruktion aus dem technischen Zeichnen.
+### Reference lines
 
-### Info-Elemente
+Tapping a vertex marks it in every view and connects the copies:
+- **center ↔ side view:** a straight line; with an orthographic center it is parallel to an axis, because both views share two coordinates.
+- **side view ↔ side view:** straight to the offset plane, then a **quarter circle**, then straight again. This is the classic construction from technical drawing.
 
-| Element | Ort | Inhalt |
+### Information
+
+| Element | Where | Contents |
 |---|---|---|
-| Statuszeile | unter dem Aufbau | aktive Drehebene, welche Ebene fest bleibt, Winkel, worauf der Strahl zeigt, Modus und Zoom |
-| Legende + Drehmatrix | linkes Handgelenk (erscheint, wenn man den Controller zum Gesicht dreht), am Desktop links | Farbbedeutungen und die 4×4-Matrix; Spalte = wohin die ursprüngliche Achse jetzt zeigt |
-| Ecken-Tooltip | über markierter Ecke | aktuelle Koordinaten (x, y, z, w) |
+| status line | below the setup | active plane, which plane stays fixed, angle, what the ray points at, mode and zoom |
+| legend + rotation matrix | left wrist (appears when you turn the controller towards your face); on desktop on the left | color meanings and the 4×4 matrix; column = where the original axis points now |
+| vertex tooltip | above a marked vertex | current coordinates (x, y, z, w) |
 
-Die Knopfwinkel zeigen, wie weit an diesem Knopf gedreht wurde. Die **tatsächliche Lage beschreibt nur die Matrix**, weil 4D-Drehungen (wie 3D-Drehungen) von der Reihenfolge abhängen.
-
----
-
-## Bedienung
-
-### Quest 3 – Controller
-
-| Aktion | Eingabe |
-|---|---|
-| Ebene drehen | Strahl auf einen Knopf, Trigger oder Grip halten, **Handgelenk drehen** (wie ein Drehregler); alternativ Stick links/rechts |
-| Aufklappen | wie oben am Falt-Knopf; eine halbe Umdrehung nach rechts = ganz auf |
-| Form / Ansicht wählen | Strahl auf ein Feld der Kopfzeile + Trigger |
-| Schaltfläche | Strahl drauf + Trigger |
-| Ecke markieren / Markierung entfernen | Strahl auf Ecke + Trigger |
-| Aufbau verschieben und drehen | Trigger oder Grip im leeren Raum halten und Hand bewegen |
-| Näher holen / wegschieben | dabei Stick vor/zurück |
-| Zoomen (0,3× – 5×) | mit **beiden** Händen greifen, Hände auseinander/zusammen |
-| Auto-Rotation an/aus (im Aufklapp-Modus: Auto-Falten) | A oder X |
-| Auswahl löschen | B |
-| Info-Panel anheften/lösen | Y |
-| Aufbau neu vor sich platzieren | linken Stick drücken |
-| Stärke der 4D-Perspektive | rechter Stick links/rechts (ohne zu greifen) |
-
-**Hand-Tracking:** Pinch entspricht dem Trigger. Drehen am Knopf funktioniert ebenfalls über das Handgelenk.
-
-Wichtig: Wenn man den Aufbau greift und dreht, ändert sich nur der **Blickwinkel**. Matrix und Seitenansichten bleiben gleich. Die Knöpfe XY/XZ/YZ dagegen drehen den Tesseract **in seinem 4D-Raum**.
-
-### Desktop (zum Entwickeln)
-
-Knopf mit der Maus ziehen, Ecke klicken, Hintergrund ziehen zum Umsehen, Mausrad zum Zoomen.
-
-| Taste | Funktion |
-|---|---|
-| S | nächste Form |
-| V | nächste Ansicht (Rissansicht → nur Form → Aufklappen) |
-| 1–6 | aktive Ebene: XY, XZ, XW, YZ, YW, ZW |
-| ← → | aktive Ebene um 5° drehen, im Aufklapp-Modus 5 % falten |
-| Leertaste | Auto-Rotation / Auto-Falten |
-| P | Zentrum perspektivisch/orthogonal |
-| R | zurücksetzen |
-| C | Auswahl löschen |
-
-In der Browser-Konsole steht `window.__tesseract` (state, views, setup, scene …) zum Experimentieren bereit, z. B. `__tesseract.state.turn(2, Math.PI/4)`.
+The knob angles show how far each knob was turned. **Only the matrix describes the actual orientation**, because 4D rotations, like 3D rotations, depend on their order.
 
 ---
 
-## Aufbau des Codes
+## Controls
+
+### Quest 3 controllers
+
+| Action | Input |
+|---|---|
+| rotate in a plane | point at a knob, hold trigger or grip, **twist your wrist** like a dial; or thumbstick left/right |
+| unfold | same on the fold knob; half a turn to the right = fully open |
+| pick shape / view | point at a header field + trigger |
+| button | point at it + trigger |
+| mark / unmark vertex | point at a vertex + trigger |
+| move and turn the setup | hold trigger or grip in empty space and move your hand |
+| pull closer / push away | thumbstick forward/back while holding |
+| zoom (0.3× – 5×) | grab with **both** hands, move them apart/together |
+| auto-rotate on/off (in unfold mode: auto-fold) | A or X |
+| clear selection | B |
+| pin/unpin the wrist panel | Y |
+| place the setup in front of you again | press the left thumbstick |
+| strength of the 4D perspective | right thumbstick left/right (while not grabbing) |
+
+**Hand tracking:** a pinch acts as the trigger. Turning knobs works with the wrist as well.
+
+Note: grabbing and turning the setup only changes your **viewpoint**; the matrix and the side views stay the same. The XY/XZ/YZ knobs, in contrast, rotate the shape **within its 4D space**.
+
+### Desktop (for development)
+
+Drag a knob with the mouse, click a vertex, drag the background to look around, scroll to zoom.
+
+| Key | Function |
+|---|---|
+| S | next shape |
+| V | next view (multi-view → shape only → unfold) |
+| 1–6 | active plane: XY, XZ, XW, YZ, YW, ZW |
+| ← → | turn the active plane by 5°; in unfold mode fold by 5 % |
+| Space | auto-rotate / auto-fold |
+| P | center perspective/orthographic |
+| R | reset |
+| C | clear selection |
+
+`window.__tesseract` (state, views, setup, scene, …) is available in the browser console, e.g. `__tesseract.state.turn(2, Math.PI / 4)`.
+
+---
+
+## Code structure
 
 ```
-index.html              Seite, Import-Map (three.js), Favicons, Desktop-Hilfe
+index.html              page, import map (three.js), favicons, desktop help
 favicon.svg/.ico, apple-touch-icon.png
+docs/                   screenshots for this README
 src/
-  config.js             alle Konstanten: Farben, Ebenen, Maße, Geschwindigkeiten, Kantenstil
-  main.js               Szene, Platzierung, Verdrahtung der Module, Render-Schleife
+  config.js             all constants: colors, planes, sizes, speeds, edge style
+  i18n.js               translations (de, en) and language detection
+  main.js               scene, placement, wiring of modules, render loop
   core/
-    math4d.js           4D-Drehung, Projektionen, Zahlenformat (ohne Three.js)
-    state.js            AppState: Form, Ansicht, Matrix, Knopfwinkel, Faltgrad, Auswahl, Meldungen
+    math4d.js           4D rotation, projections, number formatting (no three.js)
+    state.js            AppState: shape, view, matrix, knob angles, fold amount, selection, messages
   shapes/
-    common.js           Beschreibung des Formen-Formats, Kreis-Helfer
-    tesseract.js        16 Ecken, 32 Kanten (Farbe nach Achse)
-    cube3d.js           3D-Würfel bei w = 0
-    spheres.js          3D-Kugel und 4D-Kugel als Kreisnetz
-    car.js              Cabrio aus Grundformen (Flächenmodell, Kennzeichen mit Textur)
-    index.js            Liste aller Formen
+    common.js           shape format description, circle helper
+    cube3d.js           3D cube at w = 0
+    tesseract.js        16 vertices, 32 edges (colored by axis)
+    spheres.js          3D sphere and 4D sphere as circle grids
+    car.js              convertible made of primitives (surface model, textured plate)
+    index.js            list of shapes in desk order
   render/
-    batches.js          instanzierte Leisten/Rohre, Kugeln, dynamische Vierecke
-    views.js            Zentrum + 3 Seitenansichten für die gewählte Form, Ecken-Picking
-    meshProjector.js    Flächenmodelle (Auto) durch Drehung und Projektion schicken
-    links.js            Ordnungslinien und Viertelkreisbögen
-    unfold.js           Aufklappen: Würfel mit Blatt und Schatten, Tesseract als Dalí-Kreuz
+    batches.js          instanced beams/tubes, spheres, dynamic quads
+    views.js            center + 3 side views for the chosen shape, vertex picking
+    meshProjector.js    sends surface models (the car) through rotation and projection
+    links.js            reference lines and quarter-circle arcs
+    unfold.js           unfolding: cube with sheet and shadow, tesseract as Dalí cross
   ui/
-    canvasPanel.js      Canvas-Textur als Fläche/Sprite, Text-Helfer, UI-Farben
-    pult.js             Bedienpult mit 6 Knöpfen und Schaltflächen
-    statusLine.js       Statuszeile
-    infoPanel.js        Legende + Drehmatrix
-    vertexLabels.js     Koordinaten-Tooltips
+    canvasPanel.js      canvas texture on a plane/sprite, text helpers, UI colors
+    pult.js             control desk with header, knobs and buttons
+    statusLine.js       status line
+    infoPanel.js        legend + rotation matrix
+    vertexLabels.js     coordinate tooltips
   input/
-    interaction.js      Zeiger (XR-Controller, Hände, Maus), Treffer, Gamepad-Tasten
-    manipulator.js      Aufbau greifen, verschieben, zoomen
+    interaction.js      pointers (XR controllers, hands, mouse), hit testing, gamepad buttons
+    manipulator.js      grab, move and zoom the setup
 ```
 
-### Datenfluss pro Frame
+Code comments are in German.
+
+### Data flow per frame
 
 ```
-Interaction.update   Eingaben lesen → state ändern (turn, toggle…)
-AppState.update      Auto-Rotation, Projektions-Überblendung, Matrix nachorthonormieren
-ViewSet.update       Ecken drehen (M·v) und projizieren → Kanten/Ecken-Batches
-Links.update         Ordnungslinien für markierte Ecken
-UI-Module            zeichnen ihre Canvas nur neu, wenn sich state.version ändert (gedrosselt)
+Interaction.update   read input → change state (turn, toggle, …)
+AppState.update      auto-rotation/folding, projection blend, re-orthonormalize the matrix
+ViewSet.update       rotate vertices (M·v) and project → edge/vertex batches
+  or UnfoldScene.update
+Links.update         reference lines for marked vertices
+UI modules           redraw their canvas only when state.version changes (throttled)
 renderer.render
 ```
 
-### Mathematik in Kürze
+### The math in brief
 
-- **Orientierung:** 4×4-Matrix `M` (zeilenweise im Array). Ecke `v` wird zu `M·v`.
-- **Drehung in Ebene (a, b) um θ:** Zeilen a und b von `M` werden gemischt (`M ← G·M`). Die Drehung bezieht sich also immer auf die festen Achsen der Ansicht, nicht auf die schon gedrehten.
-- **Feste Ebene:** Bei Drehung in (a, b) bleibt die Ebene der beiden anderen Achsen komplett unverändert (XW ↔ YZ, YW ↔ XZ, ZW ↔ XY).
-- **Perspektive:** Kamera bei w = d, Faktor `d / (d − w)`. Die Überblendung zur orthogonalen Projektion läuft mit `1 + t·(Faktor − 1)`.
-- **Seitenansicht ohne a:** Koordinate a wird durch w ersetzt, dann um `SIDE_OFFSET` entlang a versetzt.
+- **Orientation:** a 4×4 matrix `M` (row-major array). Vertex `v` becomes `M·v`.
+- **Rotation in plane (a, b) by θ:** rows a and b of `M` are mixed (`M ← G·M`), so rotations always refer to the fixed axes of the view, not to already rotated ones.
+- **Fixed plane:** rotating in (a, b) leaves the plane of the other two axes completely unchanged (XW ↔ YZ, YW ↔ XZ, ZW ↔ XY).
+- **Perspective:** camera at w = d, factor `d / (d − w)`. The blend to orthographic uses `1 + t·(factor − 1)`.
+- **Side view without a:** coordinate a is replaced by w, then offset by `SIDE_OFFSET` along a.
 
 ---
 
-## Weiterentwickeln
+## Extending it
 
-| Vorhaben | Wo ansetzen |
+| Goal | Where to start |
 |---|---|
-| Farben, Größen, Abstände | nur `config.js` |
-| Neue Schaltfläche | `Pult.buttons` (Beschriftung) + `Pult.action` + Methode in `AppState` |
-| Neue Darstellung (z. B. Schnitt-Modus) | neues Modul in `render/` nach dem Muster von `views.js`, in `main.js` einhängen, Moduswert in `state.viewMode` |
-| Neue Form (z. B. 16-Zeller, 24-Zeller, Würfelpyramide) | Datei in `src/shapes/` nach dem Format in `common.js`, in `shapes/index.js` eintragen. Sie erscheint automatisch am Pult. |
-| Weitere Eingabe | `Interaction.press/release/update`; Zeiger liefern nur einen Strahl und ein Quaternion |
+| colors, sizes, spacing | `config.js` only |
+| change texts, add a language | `i18n.js`: add a block with the same keys; missing keys fall back to English |
+| new button | `Pult.buttons` (label) + `Pult.action` + a method in `AppState` |
+| new view (e.g. a slicing mode) | a new module in `render/` following `views.js`, hooked into `main.js`, a new value for `state.viewMode` |
+| new shape (e.g. 16-cell, 24-cell, cube pyramid) | a file in `src/shapes/` following the format in `common.js`, added to `shapes/index.js`; it appears on the desk automatically |
+| other input | `Interaction.press/release/update`; pointers only provide a ray and a quaternion |
 
-### Geplante Ausbaustufen
+### Roadmap
 
-1. **Geführte Tour:** 6 Kapitel als Voreinstellungen mit je einer Aufgabe in der Statuszeile
-2. Hinweise bei besonderen Momenten (z. B. bei 90°: „X und W haben getauscht“), Zellen einzeln anwählen
-3. Schnitt-Modus (3D-Querschnitt bei w = c, ideal für die 4D-Kugel), Tesseract direkt mit den Händen drehen
-4. Weitere Formen: Würfelpyramide, Duoprisma, 16-Zeller, 24-Zeller
+1. **Guided tour:** 6 chapters as presets, each with one task in the status line
+2. Hints at special moments (e.g. at 90°: “X and W have swapped”), selecting individual cells
+3. Slicing mode (3D cross-section at w = c, ideal for the 4D sphere), turning the tesseract directly with your hands
+4. More shapes: cube pyramid, duoprism, 16-cell, 24-cell
 
-### Bekannte Grenzen
+### Known limitations
 
-- Auf echter Hardware noch nicht getestet. Ausprobiert wurde nur die Desktop-Ansicht im Browser.
-- Die Ansicht „ohne Z“ liegt hinter dem Zentrum. Von vorn ist sie verdeckt, dafür muss man den Kopf seitlich bewegen oder den Aufbau drehen.
-- Die Linienstärken sind auf eine Betrachtung aus etwa 50–80 cm abgestimmt. Bei starkem Zoom-out werden sie dünn.
-- Die Knopfwinkel werden auf ±180° gefaltet angezeigt.
-- Im Aufklapp-Modus gibt es keine Rissansicht und keine Eckenauswahl.
+- The “without Z” view sits behind the center and is hidden from the front; move your head sideways or turn the setup.
+- Line thicknesses are tuned for viewing from about 50–80 cm; they get thin when zoomed far out.
+- Knob angles are shown folded to ±180°.
+- Unfold mode has no multi-view and no vertex selection.
+- Switching the language reloads the page, so do it before entering AR.

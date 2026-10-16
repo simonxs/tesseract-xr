@@ -5,25 +5,28 @@
 import * as THREE from 'three';
 import { PLANES, AXIS_COLORS } from '../config.js';
 import { addCircle, dashed, solid, unit } from './common.js';
+import { t } from '../i18n.js';
 
 const R = 1.5;
 const GREY = new THREE.Color(0x8792a6);
 
-function base(id, label, hint) {
+function base(id) {
   return {
-    id, label, hint,
+    id,
+    get label() { return t(`shape.${id}`); },
+    get hint() { return t(`hint.${id}`); },
     vertices: [], edges: [],
     edgeScale: 0.55,
     showPoints: false,
     selectable: false,
     unfold: false,
-    unfoldReason: 'Eine Kugel lässt sich nicht flach abwickeln',
+    get unfoldReason() { return t('reason.sphere'); },
     vertexName: () => '',
   };
 }
 
 // ---------- 3D-Kugel ----------
-export const sphere3d = base('sphere3d', '3D-Kugel', 'Kreise in den Achsenfarben = Koordinatenebenen');
+export const sphere3d = base('sphere3d');
 {
   const s = sphere3d, O = [0, 0, 0, 0];
   addCircle(s, O, unit(0), unit(1), R, dashed(0, 1));   // XY
@@ -39,7 +42,7 @@ export const sphere3d = base('sphere3d', '3D-Kugel', 'Kreise in den Achsenfarben
 }
 
 // ---------- 4D-Kugel ----------
-export const sphere4d = base('sphere4d', '4D-Kugel', 'je ein Großkreis pro Drehebene, blasse Schalen bei w = ±0,9');
+export const sphere4d = base('sphere4d');
 {
   const s = sphere4d, O = [0, 0, 0, 0];
   for (const p of PLANES) addCircle(s, O, unit(p.a), unit(p.b), R, dashed(p.a, p.b));

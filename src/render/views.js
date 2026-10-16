@@ -10,6 +10,7 @@ import {
 import { SegmentBatch, PointBatch } from './batches.js';
 import { MeshProjector } from './meshProjector.js';
 import { CanvasPanel, richText, FONT, UI } from '../ui/canvasPanel.js';
+import { t } from '../i18n.js';
 
 const SEL_COL = SEL_COLORS.map((c) => new THREE.Color(c));
 const V_COL = new THREE.Color(VERTEX_COLOR);
@@ -36,10 +37,10 @@ export class ViewSet {
       const label = new CanvasPanel(512, 128, 4.2, { sprite: true });
       label.draw((ctx, w) => {
         ctx.textBaseline = 'middle';
-        richText(ctx, [{ t: 'ohne ' }, { t: AXES[a], c: AXIS_CSS[a] }], w / 2, 40, 'center', `700 46px ${FONT}`);
+        richText(ctx, [{ t: t('view.without') }, { t: AXES[a], c: AXIS_CSS[a] }], w / 2, 40, 'center', `700 46px ${FONT}`);
         richText(ctx, [
-          { t: 'W', c: AXIS_CSS[3] }, { t: ' liegt auf der ', c: UI.dim },
-          { t: AXES[a], c: AXIS_CSS[a] }, { t: '-Richtung', c: UI.dim },
+          { t: 'W', c: AXIS_CSS[3] }, { t: t('view.liesOn'), c: UI.dim },
+          { t: AXES[a], c: AXIS_CSS[a] }, { t: t('view.dir'), c: UI.dim },
         ], w / 2, 96, 'center', `500 30px ${FONT}`);
       });
       label.mesh.position.set(0, SIDE_FRAME / 2 + 0.75, 0);
@@ -87,13 +88,13 @@ export class ViewSet {
   /** Projiziert alle Ecken neu und befüllt die Batches. hover = { type: 'vertex', i } | null */
   update(state, hover) {
     const shape = this.shape;
-    const M = state.M, t = state.easedBlend, d = state.perspDist;
+    const M = state.M, blend = state.easedBlend, d = state.perspDist;
     const riss = state.viewMode === 'riss';
     const V = shape.vertices;
 
     for (let i = 0; i < V.length; i++) {
       const r = applyMat(M, V[i], this.rot[i]);
-      projectCenter(r, t, d, this.center[i]);
+      projectCenter(r, blend, d, this.center[i]);
       if (riss) for (let a = 0; a < 3; a++) projectSide(r, a, this.side[a][i]).add(this.sideOffset[a]);
     }
 
@@ -127,7 +128,7 @@ export class ViewSet {
     for (const { view, p } of this.projectors) {
       p.mesh.visible = view === 0 || riss;
       if (!p.mesh.visible) continue;
-      if (view === 0) p.update(M, (r, o) => projectCenter(r, t, d, o));
+      if (view === 0) p.update(M, (r, o) => projectCenter(r, blend, d, o));
       else {
         const a = view - 1, off = this.sideOffset[a];
         p.update(M, (r, o) => projectSide(r, a, o).add(off));
@@ -139,8 +140,8 @@ export class ViewSet {
     this.centerLabel.drawIfChanged(`${state.perspective}`, (ctx, w) => {
       ctx.textBaseline = 'middle';
       const segs = state.perspective
-        ? [{ t: 'Zentrum · Perspektive aus ' }, { t: 'W', c: AXIS_CSS[3] }]
-        : [{ t: 'Zentrum · ohne ' }, { t: 'W', c: AXIS_CSS[3] }, { t: ' (orthogonal)' }];
+        ? [{ t: t('view.centerPersp') }, { t: 'W', c: AXIS_CSS[3] }]
+        : [{ t: t('view.centerOrtho') }, { t: 'W', c: AXIS_CSS[3] }, { t: t('view.orthoSuffix') }];
       richText(ctx, segs, w / 2, 40, 'center', `600 34px ${FONT}`);
     }, 0);
   }

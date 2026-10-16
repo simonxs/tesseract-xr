@@ -5,6 +5,7 @@
 // Fahrtrichtung = +x, oben = +y, links (in Fahrtrichtung) = −z.
 
 import * as THREE from 'three';
+import { t } from '../i18n.js';
 
 const C = {
   body: 0xf2a93b, dark: 0x2b2f37, seat: 0x3d4350, glass: 0x9fd3ff, wheel: 0x1f2228,
@@ -100,15 +101,15 @@ function buildCar() {
 
 export const car = {
   id: 'car',
-  label: 'Auto',
+  get label() { return t('shape.car'); },
   vertices: [],
   edges: [],
   edgeScale: 1,
   showPoints: false,
   selectable: false,
   unfold: false,
-  unfoldReason: 'Ein Auto lässt sich nicht aufklappen',
+  get unfoldReason() { return t('reason.car'); },
   vertexName: () => '',
-  hint: 'Lenkrad links · Drehe XW auf 180°',
+  get hint() { return t('hint.car'); },
   get mesh() { return (this._mesh ||= buildCar()); },
 };

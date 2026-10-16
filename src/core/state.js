@@ -6,6 +6,7 @@ import {
   PLANES, AUTO_SPEED, PERSP_DIST, PERSP_MIN, PERSP_MAX, MAX_SELECTION, UNFOLD_SPEED,
 } from '../config.js';
 import { SHAPE_BY_ID } from '../shapes/index.js';
+import { t } from '../i18n.js';
 
 export class AppState {
   constructor() {
@@ -65,7 +66,7 @@ export class AppState {
     this.selection = [];
     if (this.viewMode === 'unfold' && !this.shape.unfold) {
       this.viewMode = 'riss';
-      this.flash(`${this.shape.unfoldReason}. Gewechselt zur Rissansicht.`);
+      this.flash(t('msg.switchedRiss', { reason: this.shape.unfoldReason }));
     }
     this.bump();
   }

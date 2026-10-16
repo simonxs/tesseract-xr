@@ -58,8 +58,5 @@ export const ROLE_COLORS = { base: 0x9aa4b4, wall: 0x4da3ff, lid: 0xffc83d };
 export const ROLE_CSS    = { base: '#a9b2c2', wall: '#5aaeff', lid: '#ffc83d' };
 export const UNFOLD_SPEED = 0.15;     // Anteil pro Sekunde bei Auto-Falten
 
-export const VIEW_MODES = [
-  { id: 'riss', label: 'Rissansicht' },
-  { id: 'single', label: 'nur Form' },
-  { id: 'unfold', label: 'Aufklappen' },
-];
+// Ansichten (Beschriftung kommt aus i18n.js: view.<id>)
+export const VIEW_MODES = [{ id: 'riss' }, { id: 'single' }, { id: 'unfold' }];

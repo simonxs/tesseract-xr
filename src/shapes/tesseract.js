@@ -3,6 +3,7 @@
 // Jede Kante verbindet zwei Ecken, die sich in genau einem Bit unterscheiden → Farbe dieser Achse.
 
 import { AXIS_COL, signs } from './common.js';
+import { t } from '../i18n.js';
 
 const vertices = Array.from({ length: 16 }, (_, i) => [0, 1, 2, 3].map((b) => ((i >> b) & 1 ? 1 : -1)));
 const edges = [];
@@ -15,7 +16,7 @@ for (let i = 0; i < 16; i++) {
 
 export const tesseract = {
   id: 'tesseract',
-  label: 'Tesseract',
+  get label() { return t('shape.tesseract'); },
   vertices,
   edges,
   edgeScale: 1,
@@ -23,5 +24,5 @@ export const tesseract = {
   selectable: true,
   unfold: true,
   vertexName: (i) => signs(vertices[i]),
-  hint: 'Kantenfarbe = Achsenrichtung',
+  get hint() { return t('hint.tesseract'); },
 };
