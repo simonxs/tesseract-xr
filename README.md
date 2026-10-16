@@ -232,3 +232,9 @@ renderer.render
 - Knob angles are shown folded to ±180°.
 - Unfold mode has no multi-view and no vertex selection.
 - Switching the language reloads the page, so do it before entering AR.
+
+---
+
+## License
+
+[MIT](LICENSE) © 2026 Simon Schliecker. three.js is loaded from a CDN and is itself MIT-licensed.

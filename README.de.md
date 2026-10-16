@@ -233,3 +233,9 @@ renderer.render
 - Der Sprachwechsel lädt die Seite neu, also vor dem Start von AR umschalten.
 
 Die Kommentare im Code sind auf Deutsch.
+
+---
+
+## Lizenz
+
+[MIT](LICENSE) © 2026 Simon Schliecker. three.js wird vom CDN geladen und steht selbst unter MIT-Lizenz.
