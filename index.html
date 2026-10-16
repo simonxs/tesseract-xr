@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tesseract XR</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0e1219; color: #e9edf3;
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  #app { position: fixed; inset: 0; }
+  #help { position: fixed; top: 14px; left: 16px; right: 16px; max-width: 30rem; pointer-events: none;
+    background: rgba(14,18,26,.72); border: 1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 12px 14px; }
+  #help h1 { font-size: 17px; margin: 0 0 4px; }
+  #help p { margin: 0; color: #9ba6b8; font-size: 13.5px; }
+  #help kbd { font: 12px ui-monospace, monospace; background: rgba(255,255,255,.1); border-radius: 4px; padding: 0 4px; color: #e9edf3; }
+  body.xr #help { display: none; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="app"></div>
+<div id="help">
+  <h1>Tesseract XR</h1>
+  <p>Auf der Quest 3 unten „Start AR“ antippen. Am Desktop: Knopf ziehen, Ecke klicken, Hintergrund ziehen zum Umsehen.
+  Tasten: <kbd>1</kbd>–<kbd>6</kbd> Ebene, <kbd>←</kbd><kbd>→</kbd> drehen, <kbd>Leertaste</kbd> Auto,
+  <kbd>P</kbd> Projektion, <kbd>V</kbd> Ansicht, <kbd>R</kbd> Reset, <kbd>C</kbd> Auswahl löschen.</p>
+</div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
