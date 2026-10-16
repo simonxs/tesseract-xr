@@ -19,7 +19,8 @@ export const PLANES = [
 
 // Maßstab: Meter pro Tesseract-Einheit (Ecken liegen bei ±1)
 export const UNIT_RISS   = 0.035;  // Rissansicht (5 Darstellungen)
-export const UNIT_SINGLE = 0.075;  // nur Tesseract
+export const UNIT_SINGLE = 0.075;  // nur die Form
+export const UNIT_UNFOLD = 0.03;   // Aufklappen (Würfel + Tesseract nebeneinander)
 
 // Rissansicht: Jede Seitenansicht liegt entlang der Achse, die sie weglässt.
 // Index = weggelassene Achse (0 = X, 1 = Y, 2 = Z). Z-Ansicht liegt hinter dem Zentrum.
@@ -31,6 +32,9 @@ export const SIDE_FRAME = 4.2;
 export const PERSP_DIST = 4;
 export const PERSP_MIN = 2.6;
 export const PERSP_MAX = 9;
+
+// Kanten als 4-kantige Leisten ('beam') oder runde Rohre ('tube')
+export const EDGE_STYLE = 'beam';
 
 // Strichstärken in Tesseract-Einheiten
 export const EDGE_RADIUS = 0.07;
@@ -48,3 +52,14 @@ export const KNOB_GAIN = 1.0;         // Handgelenk-Drehung → Drehwinkel
 export const MOUSE_KNOB_GAIN = 0.012; // rad pro Pixel
 export const ZOOM_MIN = 0.3;
 export const ZOOM_MAX = 5;
+
+// Aufklappen: Farben nach Rolle der Zelle
+export const ROLE_COLORS = { base: 0x9aa4b4, wall: 0x4da3ff, lid: 0xffc83d };
+export const ROLE_CSS    = { base: '#a9b2c2', wall: '#5aaeff', lid: '#ffc83d' };
+export const UNFOLD_SPEED = 0.15;     // Anteil pro Sekunde bei Auto-Falten
+
+export const VIEW_MODES = [
+  { id: 'riss', label: 'Rissansicht' },
+  { id: 'single', label: 'nur Form' },
+  { id: 'unfold', label: 'Aufklappen' },
+];

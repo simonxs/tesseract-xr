@@ -1,7 +1,7 @@
 // Legende + aktuelle Orientierung (4×4-Drehmatrix).
 // In VR am linken Handgelenk, am Desktop fest neben dem Aufbau.
 
-import { AXES, AXIS_CSS, SEL_CSS } from '../config.js';
+import { AXES, AXIS_CSS, SEL_CSS, ROLE_CSS } from '../config.js';
 import { fmt } from '../core/math4d.js';
 import { CanvasPanel, panelBg, richText, FONT, UI } from './canvasPanel.js';
 
@@ -12,34 +12,19 @@ export class InfoPanel {
   }
 
   update(state) {
-    this.panel.drawIfChanged(state.version, (ctx, w, h) => this.draw(ctx, w, h, state), 100);
+    this.panel.drawIfChanged(`${state.version}`, (ctx, w, h) => this.draw(ctx, w, h, state), 100);
   }
 
   draw(ctx, w, h, state) {
     panelBg(ctx, w, h, 26);
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
-
     ctx.font = `600 22px ${FONT}`;
     ctx.fillStyle = UI.dim;
     ctx.fillText('LEGENDE', 32, 40);
 
-    for (let a = 0; a < 4; a++) {
-      const y = 82 + a * 38;
-      ctx.strokeStyle = AXIS_CSS[a];
-      ctx.lineWidth = 8;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(36, y);
-      ctx.lineTo(86, y);
-      ctx.stroke();
-      richText(ctx, [{ t: AXES[a], c: AXIS_CSS[a], f: `700 26px ${FONT}` }, { t: '-Kanten  ·  8 Stück' }],
-        104, y, 'left', `500 24px ${FONT}`);
-    }
-    ctx.font = `500 22px ${FONT}`;
-    ctx.fillStyle = UI.text;
-    ctx.fillText('Dicke Kante = näher in W', 36, 248);
-    richText(ctx, [{ t: 'Markierte Ecken: ' }, ...SEL_CSS.map((c) => ({ t: '● ', c }))], 36, 280, 'left', `500 22px ${FONT}`);
+    if (state.viewMode === 'unfold') this.legendUnfold(ctx);
+    else this.legendAxes(ctx, state);
 
     ctx.font = `600 22px ${FONT}`;
     ctx.fillStyle = UI.dim;
@@ -74,5 +59,44 @@ export class InfoPanel {
     ctx.fillStyle = UI.dim;
     ctx.fillText('Spalte = wohin die ursprüngliche', 32, 622);
     ctx.fillText('Achse jetzt zeigt', 32, 650);
+  }
+
+  legendAxes(ctx, state) {
+    for (let a = 0; a < 4; a++) {
+      const y = 82 + a * 38;
+      ctx.strokeStyle = AXIS_CSS[a];
+      ctx.lineWidth = 9;
+      ctx.lineCap = 'butt';
+      ctx.beginPath();
+      ctx.moveTo(36, y);
+      ctx.lineTo(86, y);
+      ctx.stroke();
+      richText(ctx, [{ t: AXES[a], c: AXIS_CSS[a], f: `700 26px ${FONT}` }, { t: '-Richtung' }],
+        104, y, 'left', `500 24px ${FONT}`);
+    }
+    ctx.font = `500 22px ${FONT}`;
+    ctx.fillStyle = UI.text;
+    ctx.fillText('Dicke Kante = näher in W', 36, 248);
+    if (state.shape.selectable) {
+      richText(ctx, [{ t: 'Markierte Ecken: ' }, ...SEL_CSS.map((c) => ({ t: '● ', c }))], 36, 282, 'left', `500 22px ${FONT}`);
+    } else {
+      richText(ctx, [{ t: state.shape.hint, c: UI.dim }], 36, 282, 'left', `500 20px ${FONT}`);
+    }
+  }
+
+  legendUnfold(ctx) {
+    const rows = [['base', 'Boden'], ['wall', 'Wände'], ['lid', 'Deckel']];
+    rows.forEach(([role, name], k) => {
+      const y = 82 + k * 38;
+      ctx.fillStyle = ROLE_CSS[role];
+      ctx.fillRect(36, y - 9, 50, 18);
+      richText(ctx, [{ t: name, c: ROLE_CSS[role], f: `700 24px ${FONT}` }], 104, y, 'left', `500 24px ${FONT}`);
+    });
+    ctx.font = `500 22px ${FONT}`;
+    ctx.fillStyle = UI.text;
+    ctx.fillText('Würfel:  1 + 4 + 1 = 6 Quadrate', 36, 210);
+    ctx.fillText('Tesseract:  1 + 6 + 1 = 8 Würfel', 36, 244);
+    ctx.fillStyle = UI.dim;
+    ctx.fillText('Wände klappen in die W-Richtung', 36, 282);
   }
 }

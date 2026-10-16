@@ -1,39 +1,29 @@
-// Die fünf Darstellungen: Zentrum (perspektivisch/orthogonal) und die drei Seitenansichten
-// "ohne X/Y/Z" der Rissansicht. Alles liegt in this.group, deren Maßstab = Meter pro Einheit.
-//
-// Hinweis: Die Rissansicht hat 4 Ansichten ("ohne W" = Zentrum orthogonal + 3 Seitenansichten).
+// Darstellung der gewählten Form: Zentrum (perspektivisch/orthogonal) und in der Rissansicht
+// zusätzlich die Seitenansichten "ohne X/Y/Z". Alles liegt in this.group, deren Maßstab = Meter pro Einheit.
 
 import * as THREE from 'three';
-import { VERTICES, EDGES } from '../core/tesseract.js';
 import { applyMat, projectCenter, projectSide, nearness } from '../core/math4d.js';
 import {
-  AXES, AXIS_COLORS, AXIS_CSS, SIDE_OFFSET, SIDE_DIR, SIDE_FRAME,
+  AXES, AXIS_COLORS, AXIS_CSS, SIDE_OFFSET, SIDE_DIR, SIDE_FRAME, EDGE_STYLE,
   EDGE_RADIUS, VERTEX_RADIUS, VERTEX_COLOR, SEL_COLORS,
 } from '../config.js';
 import { SegmentBatch, PointBatch } from './batches.js';
+import { MeshProjector } from './meshProjector.js';
 import { CanvasPanel, richText, FONT, UI } from '../ui/canvasPanel.js';
 
-const AXIS_COL = AXIS_COLORS.map((c) => new THREE.Color(c));
 const SEL_COL = SEL_COLORS.map((c) => new THREE.Color(c));
 const V_COL = new THREE.Color(VERTEX_COLOR);
 const HOVER_COL = new THREE.Color(0xffffff);
+const ORIGIN = new THREE.Vector3();
 
 export class ViewSet {
   constructor() {
     this.group = new THREE.Group();
     this.group.name = 'views';
-
-    const edgeMat = new THREE.MeshStandardMaterial({ roughness: 0.45, metalness: 0.05 });
-    const vertMat = new THREE.MeshStandardMaterial({ roughness: 0.3, metalness: 0.05 });
-    this.edges = new SegmentBatch(EDGES.length * 4, edgeMat);
-    this.points = new PointBatch(VERTICES.length * 4, vertMat);
-    this.group.add(this.edges.mesh, this.points.mesh);
-
-    // Positionen in Tesseract-Einheiten (lokal in this.group)
-    this.rot = VERTICES.map(() => [0, 0, 0, 0]);
-    this.center = VERTICES.map(() => new THREE.Vector3());
-    this.side = [0, 1, 2].map(() => VERTICES.map(() => new THREE.Vector3()));
+    this.edgeMat = new THREE.MeshStandardMaterial({ roughness: 0.5, metalness: 0.05 });
+    this.vertMat = new THREE.MeshStandardMaterial({ roughness: 0.3, metalness: 0.05 });
     this.sideOffset = SIDE_DIR.map((d) => new THREE.Vector3(...d).multiplyScalar(SIDE_OFFSET));
+    this.projectors = [];
 
     // Rahmen + Beschriftung je Seitenansicht, Rahmenfarbe = weggelassene Achse
     this.sideDecor = [0, 1, 2].map((a) => {
@@ -63,43 +53,90 @@ export class ViewSet {
     this.group.add(this.centerLabel.mesh);
   }
 
+  /** Neue Form: Batches und Flächenmodelle passend anlegen */
+  setShape(shape) {
+    this.shape = shape;
+    if (this.edges) {
+      this.group.remove(this.edges.mesh, this.points.mesh);
+      this.edges.dispose();
+      this.points.dispose();
+    }
+    for (const { p } of this.projectors) { this.group.remove(p.mesh); p.dispose(); }
+    this.projectors = [];
+
+    const nV = shape.vertices.length, nE = shape.edges.length;
+    this.edges = new SegmentBatch(Math.max(1, nE * 4), this.edgeMat, { beam: EDGE_STYLE === 'beam' });
+    this.points = new PointBatch(Math.max(1, nV * 4), this.vertMat);
+    this.group.add(this.edges.mesh, this.points.mesh);
+
+    this.rot = shape.vertices.map(() => [0, 0, 0, 0]);
+    this.center = shape.vertices.map(() => new THREE.Vector3());
+    this.side = [0, 1, 2].map(() => shape.vertices.map(() => new THREE.Vector3()));
+
+    if (shape.mesh) {
+      for (let view = 0; view < 4; view++) {
+        for (const part of shape.mesh) {
+          const p = new MeshProjector(part);
+          this.group.add(p.mesh);
+          this.projectors.push({ view, p });
+        }
+      }
+    }
+  }
+
   /** Projiziert alle Ecken neu und befüllt die Batches. hover = { type: 'vertex', i } | null */
   update(state, hover) {
+    const shape = this.shape;
     const M = state.M, t = state.easedBlend, d = state.perspDist;
     const riss = state.viewMode === 'riss';
+    const V = shape.vertices;
 
-    for (let i = 0; i < VERTICES.length; i++) {
-      const r = applyMat(M, VERTICES[i], this.rot[i]);
+    for (let i = 0; i < V.length; i++) {
+      const r = applyMat(M, V[i], this.rot[i]);
       projectCenter(r, t, d, this.center[i]);
       if (riss) for (let a = 0; a < 3; a++) projectSide(r, a, this.side[a][i]).add(this.sideOffset[a]);
     }
 
     const views = riss ? [this.center, ...this.side] : [this.center];
+    const centroids = [ORIGIN, ...this.sideOffset];
+    const er = EDGE_RADIUS * shape.edgeScale;
 
     this.edges.begin();
-    for (const P of views) {
-      for (const e of EDGES) {
+    views.forEach((P, v) => {
+      for (const e of shape.edges) {
         const w = (this.rot[e.i][3] + this.rot[e.j][3]) / 2;
-        this.edges.add(P[e.i], P[e.j], EDGE_RADIUS * nearness(w), AXIS_COL[e.axis]);
+        this.edges.add(P[e.i], P[e.j], er * nearness(w), e.color, centroids[v]);
       }
-    }
+    });
     this.edges.end();
 
     this.points.begin();
-    for (const P of views) {
-      for (let i = 0; i < VERTICES.length; i++) {
-        const s = state.selection.indexOf(i);
-        const hov = hover && hover.type === 'vertex' && hover.i === i;
-        const col = s >= 0 ? SEL_COL[s] : hov ? HOVER_COL : V_COL;
-        const k = s >= 0 ? 1.8 : hov ? 1.5 : 1;
-        this.points.add(P[i], VERTEX_RADIUS * nearness(this.rot[i][3]) * k, col);
+    if (shape.showPoints) {
+      for (const P of views) {
+        for (let i = 0; i < V.length; i++) {
+          const s = state.selection.indexOf(i);
+          const hov = hover && hover.type === 'vertex' && hover.i === i;
+          const col = s >= 0 ? SEL_COL[s] : hov ? HOVER_COL : V_COL;
+          const k = s >= 0 ? 1.8 : hov ? 1.5 : 1;
+          this.points.add(P[i], VERTEX_RADIUS * nearness(this.rot[i][3]) * k, col);
+        }
       }
     }
     this.points.end();
 
+    for (const { view, p } of this.projectors) {
+      p.mesh.visible = view === 0 || riss;
+      if (!p.mesh.visible) continue;
+      if (view === 0) p.update(M, (r, o) => projectCenter(r, t, d, o));
+      else {
+        const a = view - 1, off = this.sideOffset[a];
+        p.update(M, (r, o) => projectSide(r, a, o).add(off));
+      }
+    }
+
     for (const g of this.sideDecor) g.visible = riss;
 
-    this.centerLabel.drawIfChanged(`${state.perspective}|${riss}`, (ctx, w) => {
+    this.centerLabel.drawIfChanged(`${state.perspective}`, (ctx, w) => {
       ctx.textBaseline = 'middle';
       const segs = state.perspective
         ? [{ t: 'Zentrum · Perspektive aus ' }, { t: 'W', c: AXIS_CSS[3] }]
@@ -110,6 +147,7 @@ export class ViewSet {
 
   /** Nächste Ecke entlang eines Strahls (Weltkoordinaten) oder null */
   pickVertex(ray, riss) {
+    if (!this.shape?.selectable || !this.group.visible) return null;
     this.group.updateMatrixWorld();
     const inv = new THREE.Matrix4().copy(this.group.matrixWorld).invert();
     const local = ray.clone().applyMatrix4(inv);
@@ -132,7 +170,6 @@ export class ViewSet {
     return best;
   }
 
-  /** Weltposition der Ecke i im Zentrum */
   centerWorld(i, out) {
     return out.copy(this.center[i]).applyMatrix4(this.group.matrixWorld);
   }

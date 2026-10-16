@@ -17,7 +17,7 @@ const ARC_STEPS = 16;
 
 export class Links {
   constructor() {
-    this.batch = new SegmentBatch(600, new THREE.MeshBasicMaterial(), 6);
+    this.batch = new SegmentBatch(600, new THREE.MeshBasicMaterial(), { radialSegments: 6 });
     this.mesh = this.batch.mesh;
     this.off = SIDE_DIR.map((d, a) => SIDE_OFFSET * d[a]); // vorzeichenbehafteter Versatz je Achse
     this._p = Array.from({ length: ARC_STEPS + 4 }, () => new THREE.Vector3());
@@ -25,7 +25,7 @@ export class Links {
 
   update(state, views) {
     this.batch.begin();
-    if (state.viewMode === 'riss') {
+    if (state.viewMode === 'riss' && views.shape.selectable) {
       state.selection.forEach((i, k) => {
         const col = SEL_COL[k];
         const C = views.center[i];

@@ -1,8 +1,15 @@
 # Tesseract XR
 
-Interaktive Darstellung eines 4D-Hyperwürfels (Tesseract) für die **Meta Quest 3 im AR-Modus (Passthrough)**, gebaut mit WebXR und three.js. Ziel ist, die vierte Dimension greifbar zu machen. Man dreht den Tesseract mit Drehknöpfen in den 6 Ebenen des 4D-Raums und sieht ihn gleichzeitig in einer **Rissansicht** wie auf einem Bauplan.
+Interaktive Darstellung der vierten Dimension für die **Meta Quest 3 im AR-Modus (Passthrough)**, gebaut mit WebXR und three.js. Man dreht 4D-Formen mit Drehknöpfen in den 6 Ebenen des 4D-Raums, sieht sie in einer **Rissansicht** wie auf einem Bauplan und kann den Tesseract wie einen Würfel **aufklappen**.
 
-Version 1 · Stand Oktober 2026
+Version 2 · Stand Oktober 2026 · Live: https://tesseract-xr.okercode.de
+
+## Änderungen
+
+| Version | Inhalt |
+|---|---|
+| 2 | Formen-Auswahl (Tesseract, 3D-Würfel, 3D-Kugel, 4D-Kugel, Auto), Aufklapp-Modus (Würfel → Kreuz, Tesseract → Dalí-Kreuz), Kanten als 4-kantige Leisten, Favicon |
+| 1 | Tesseract, Rissansicht, 6 Drehknöpfe, Ordnungslinien, Legende und Drehmatrix, Greifen und Zoomen |
 
 ---
 
@@ -13,7 +20,8 @@ WebXR läuft nur über **HTTPS** (oder `localhost`). Ein Build-Schritt ist nicht
 | Weg | Vorgehen |
 |---|---|
 | Lokal am PC testen | `python3 -m http.server 8000` im Projektordner, dann `http://localhost:8000` öffnen |
-| Quest 3 | Ordner auf einen HTTPS-Webserver legen (Netlify Drop, GitHub Pages, eigener Server mit Zertifikat), Adresse im **Meta Quest Browser** öffnen, „Start AR“ antippen |
+| Quest 3 | Ordner auf einen HTTPS-Webserver legen, Adresse im **Meta Quest Browser** öffnen, „Start AR“ antippen |
+| Eigener Server (Plesk) | Plesk-Git-Erweiterung mit Deploy-Key und Webhook: jeder Push auf `main` wird automatisch ausgeliefert |
 | Quest per USB, ohne Server | `adb reverse tcp:8000 tcp:8000`, dann auf der Brille `http://localhost:8000` öffnen (localhost gilt als sicher) |
 
 Einfach die `index.html` per Doppelklick zu öffnen funktioniert nicht, weil ES-Module über `file://` blockiert werden.
@@ -21,6 +29,32 @@ Einfach die `index.html` per Doppelklick zu öffnen funktioniert nicht, weil ES-
 ---
 
 ## Was man sieht
+
+Am Pult wählt man oben in der Kopfzeile **Form** und **Ansicht**. Nicht jede Kombination ist sinnvoll; ausgegraute Felder erklären in der Statuszeile, warum.
+
+| Form | Rissansicht | nur Form | Aufklappen | Was man daran lernt |
+|---|---|---|---|---|
+| Tesseract | ✓ | ✓ | ✓ | Grundform, Drehebenen, Würfel im Würfel |
+| 3D-Würfel (bei w = 0) | ✓ | ✓ | ✓ | Ein 3D-Objekt ist im 4D-Raum flach: in „ohne X/Y/Z“ in Ruhe platt |
+| 3D-Kugel (bei w = 0) | ✓ | ✓ | – | wird bei XW zur Scheibe; nach 180° unverändert, weil sie ihr eigenes Spiegelbild ist |
+| 4D-Kugel | ✓ | ✓ | – | ein Großkreis pro Drehebene: der Kreis der aktiven Ebene kreist in sich, der Kreis der festen Ebene steht still |
+| Auto (bei w = 0) | ✓ | ✓ | – | **nach 180° in XW gespiegelt**: Lenkrad rechts, Kennzeichen spiegelverkehrt |
+
+### Kanten als Leisten
+
+Kanten sind 4-kantige Leisten statt runder Rohre. Jede Leiste ist so gedreht, dass eine flache Seite vom Mittelpunkt ihrer Ansicht weg zeigt. Dadurch wirken die verzerrten Würfel wie Rahmen, und das Licht fällt auf jede Seite anders. Umschalten in `config.js`: `EDGE_STYLE = 'beam' | 'tube'`.
+
+### Aufklappen
+
+Links ein 3D-Würfel, der sich auf einem **Blatt Papier** zu 6 Quadraten aufklappt. Auf dem Blatt liegt sein **Schatten**: das, was ein Flachländer sieht. Rechts klappt sich der Tesseract genauso zu **8 Würfeln** auf (Dalí-Kreuz). Beide hängen am selben **Falt-Knopf**, der im Aufklapp-Modus die Reihe der 4D-Knöpfe ersetzt.
+
+| Rolle | Würfel | Tesseract | Farbe |
+|---|---|---|---|
+| Boden | 1 Quadrat | 1 Würfel | Grau |
+| Wände | 4 Quadrate | 6 Würfel | Blau |
+| Deckel | 1, an der hinteren Wand | 1, an der unteren Wand | Gold |
+
+Jede Wand dreht sich um 90° um die Fläche, die sie mit dem Boden teilt: beim Würfel in die Höhe, beim Tesseract in die W-Richtung. Beim Zuklappen klappt zuerst der Deckel hoch, dann die Wände. Zugeklappt sieht man den bekannten Würfel im Würfel; beim Würfel zeigt der Schatten dazu passend ein Quadrat im Quadrat. Beim Wechsel in den Aufklapp-Modus wird die 4D-Lage zurückgesetzt; die 3D-Knöpfe drehen nur das Dalí-Kreuz.
 
 ### Rissansicht (Standard)
 
@@ -70,12 +104,14 @@ Die Knopfwinkel zeigen, wie weit an diesem Knopf gedreht wurde. Die **tatsächli
 | Aktion | Eingabe |
 |---|---|
 | Ebene drehen | Strahl auf einen Knopf, Trigger oder Grip halten, **Handgelenk drehen** (wie ein Drehregler); alternativ Stick links/rechts |
+| Aufklappen | wie oben am Falt-Knopf; eine halbe Umdrehung nach rechts = ganz auf |
+| Form / Ansicht wählen | Strahl auf ein Feld der Kopfzeile + Trigger |
 | Schaltfläche | Strahl drauf + Trigger |
 | Ecke markieren / Markierung entfernen | Strahl auf Ecke + Trigger |
 | Aufbau verschieben und drehen | Trigger oder Grip im leeren Raum halten und Hand bewegen |
 | Näher holen / wegschieben | dabei Stick vor/zurück |
 | Zoomen (0,3× – 5×) | mit **beiden** Händen greifen, Hände auseinander/zusammen |
-| Auto-Rotation an/aus | A oder X |
+| Auto-Rotation an/aus (im Aufklapp-Modus: Auto-Falten) | A oder X |
 | Auswahl löschen | B |
 | Info-Panel anheften/lösen | Y |
 | Aufbau neu vor sich platzieren | linken Stick drücken |
@@ -91,11 +127,12 @@ Knopf mit der Maus ziehen, Ecke klicken, Hintergrund ziehen zum Umsehen, Mausrad
 
 | Taste | Funktion |
 |---|---|
+| S | nächste Form |
+| V | nächste Ansicht (Rissansicht → nur Form → Aufklappen) |
 | 1–6 | aktive Ebene: XY, XZ, XW, YZ, YW, ZW |
-| ← → | aktive Ebene um 5° drehen |
-| Leertaste | Auto-Rotation |
+| ← → | aktive Ebene um 5° drehen, im Aufklapp-Modus 5 % falten |
+| Leertaste | Auto-Rotation / Auto-Falten |
 | P | Zentrum perspektivisch/orthogonal |
-| V | Rissansicht / nur Tesseract |
 | R | zurücksetzen |
 | C | Auswahl löschen |
 
@@ -106,18 +143,27 @@ In der Browser-Konsole steht `window.__tesseract` (state, views, setup, scene �
 ## Aufbau des Codes
 
 ```
-index.html              Seite, Import-Map (three.js), Desktop-Hilfe
+index.html              Seite, Import-Map (three.js), Favicons, Desktop-Hilfe
+favicon.svg/.ico, apple-touch-icon.png
 src/
-  config.js             alle Konstanten: Farben, Ebenen, Maße, Geschwindigkeiten
+  config.js             alle Konstanten: Farben, Ebenen, Maße, Geschwindigkeiten, Kantenstil
   main.js               Szene, Platzierung, Verdrahtung der Module, Render-Schleife
   core/
     math4d.js           4D-Drehung, Projektionen, Zahlenformat (ohne Three.js)
-    tesseract.js        16 Ecken, 32 Kanten (mit Achse), Eckennamen
-    state.js            AppState: Matrix, Knopfwinkel, Modi, Auswahl, version-Zähler
+    state.js            AppState: Form, Ansicht, Matrix, Knopfwinkel, Faltgrad, Auswahl, Meldungen
+  shapes/
+    common.js           Beschreibung des Formen-Formats, Kreis-Helfer
+    tesseract.js        16 Ecken, 32 Kanten (Farbe nach Achse)
+    cube3d.js           3D-Würfel bei w = 0
+    spheres.js          3D-Kugel und 4D-Kugel als Kreisnetz
+    car.js              Cabrio aus Grundformen (Flächenmodell, Kennzeichen mit Textur)
+    index.js            Liste aller Formen
   render/
-    batches.js          instanzierte Zylinder/Kugeln (ein Draw-Call je Batch)
-    views.js            Zentrum + 3 Seitenansichten, Rahmen, Beschriftung, Ecken-Picking
+    batches.js          instanzierte Leisten/Rohre, Kugeln, dynamische Vierecke
+    views.js            Zentrum + 3 Seitenansichten für die gewählte Form, Ecken-Picking
+    meshProjector.js    Flächenmodelle (Auto) durch Drehung und Projektion schicken
     links.js            Ordnungslinien und Viertelkreisbögen
+    unfold.js           Aufklappen: Würfel mit Blatt und Schatten, Tesseract als Dalí-Kreuz
   ui/
     canvasPanel.js      Canvas-Textur als Fläche/Sprite, Text-Helfer, UI-Farben
     pult.js             Bedienpult mit 6 Knöpfen und Schaltflächen
@@ -157,13 +203,15 @@ renderer.render
 | Farben, Größen, Abstände | nur `config.js` |
 | Neue Schaltfläche | `Pult.buttons` (Beschriftung) + `Pult.action` + Methode in `AppState` |
 | Neue Darstellung (z. B. Schnitt-Modus) | neues Modul in `render/` nach dem Muster von `views.js`, in `main.js` einhängen, Moduswert in `state.viewMode` |
-| Andere 4D-Körper (z. B. 16-Zeller, 24-Zeller) | `core/tesseract.js` durch eigene Ecken/Kanten ersetzen. Für die Kantenfarben pro Achse muss jede Kante eine `axis` haben; bei schrägen Kanten stattdessen nach Richtung mischen. |
+| Neue Form (z. B. 16-Zeller, 24-Zeller, Würfelpyramide) | Datei in `src/shapes/` nach dem Format in `common.js`, in `shapes/index.js` eintragen. Sie erscheint automatisch am Pult. |
 | Weitere Eingabe | `Interaction.press/release/update`; Zeiger liefern nur einen Strahl und ein Quaternion |
 
 ### Geplante Ausbaustufen
 
-1. **Version 2:** Hinweise bei besonderen Momenten (z. B. bei 90°: „X und W haben getauscht“), Flächen der aktiven Ebene hervorheben, die 8 Zellen einzeln anwählen
-2. **Version 3:** Tesseract direkt mit den Händen drehen (rechte Hand verschieben = XW/YW/ZW), Analogie-Modus 3D→2D (Würfel auf Fläche), Schnitt-Modus (3D-Querschnitt bei w = c)
+1. **Geführte Tour:** 6 Kapitel als Voreinstellungen mit je einer Aufgabe in der Statuszeile
+2. Hinweise bei besonderen Momenten (z. B. bei 90°: „X und W haben getauscht“), Zellen einzeln anwählen
+3. Schnitt-Modus (3D-Querschnitt bei w = c, ideal für die 4D-Kugel), Tesseract direkt mit den Händen drehen
+4. Weitere Formen: Würfelpyramide, Duoprisma, 16-Zeller, 24-Zeller
 
 ### Bekannte Grenzen
 
@@ -171,3 +219,4 @@ renderer.render
 - Die Ansicht „ohne Z“ liegt hinter dem Zentrum. Von vorn ist sie verdeckt, dafür muss man den Kopf seitlich bewegen oder den Aufbau drehen.
 - Die Linienstärken sind auf eine Betrachtung aus etwa 50–80 cm abgestimmt. Bei starkem Zoom-out werden sie dünn.
 - Die Knopfwinkel werden auf ±180° gefaltet angezeigt.
+- Im Aufklapp-Modus gibt es keine Rissansicht und keine Eckenauswahl.

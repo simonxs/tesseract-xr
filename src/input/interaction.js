@@ -4,8 +4,9 @@
 //   leerer Raum (nur XR) → Aufbau greifen; zwei Hände → zoomen
 
 import * as THREE from 'three';
-import { PERSP_DIST, KNOB_GAIN, MOUSE_KNOB_GAIN } from '../config.js';
+import { KNOB_GAIN, MOUSE_KNOB_GAIN } from '../config.js';
 import { Manipulator } from './manipulator.js';
+import { SHAPES } from '../shapes/index.js';
 
 class Pointer {
   constructor(kind) {
@@ -110,7 +111,7 @@ export class Interaction {
     el.addEventListener('pointermove', (e) => {
       setNdc(e);
       if (m.grab?.type === 'knob') {
-        this.state.turn(m.grab.plane, (e.clientX - m.lastX) * MOUSE_KNOB_GAIN);
+        this.turnKnob(m.grab.plane, (e.clientX - m.lastX) * MOUSE_KNOB_GAIN);
         m.lastX = e.clientX;
       }
     });
@@ -125,13 +126,19 @@ export class Interaction {
       const s = this.state;
       if (e.key >= '1' && e.key <= '6') { s.activePlane = +e.key - 1; s.bump(); }
       else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-        s.turn(s.activePlane ?? 2, (e.key === 'ArrowRight' ? 1 : -1) * (5 * Math.PI) / 180);
+        const sign = e.key === 'ArrowRight' ? 1 : -1;
+        if (s.viewMode === 'unfold') s.turnFold(sign * 0.05);
+        else s.turn(s.activePlane ?? 2, (sign * 5 * Math.PI) / 180);
         e.preventDefault();
+      }
+      else if (e.key === 's') {
+        const k = SHAPES.findIndex((x) => x.id === s.shapeId);
+        s.setShape(SHAPES[(k + 1) % SHAPES.length].id);
       }
       else if (e.code === 'Space') { s.toggleAuto(); e.preventDefault(); }
       else if (e.key === 'r') s.reset();
       else if (e.key === 'p') s.togglePerspective();
-      else if (e.key === 'v') s.toggleViewMode();
+      else if (e.key === 'v') s.cycleViewMode();
       else if (e.key === 'c') s.clearSelection();
     });
   }
@@ -159,10 +166,10 @@ export class Interaction {
     if (t.type === 'knob') {
       p.grab = { type: 'knob', plane: t.plane, q: p.quat.clone() };
       s.turning = t.plane;
-      s.activePlane = t.plane;
+      if (t.plane !== 'fold') s.activePlane = t.plane;
       s.bump();
-    } else if (t.type === 'button') {
-      this.pult.action(t.id);
+    } else if (t.type === 'button' || t.type === 'chip') {
+      this.pult.action(t);
     } else if (t.type === 'vertex') {
       s.toggleSelect(t.i);
     }
@@ -204,7 +211,7 @@ export class Interaction {
           let ang = 2 * Math.atan2(_dq.z, _dq.w);
           if (ang > Math.PI) ang -= 2 * Math.PI;
           if (ang < -Math.PI) ang += 2 * Math.PI;
-          if (Math.abs(ang) > 1e-4) s.turn(p.grab.plane, -ang * KNOB_GAIN);
+          if (Math.abs(ang) > 1e-4) this.turnKnob(p.grab.plane, -ang * KNOB_GAIN);
           p.grab.q.copy(p.quat);
         }
         this.gamepadInput(p, dt);
@@ -227,12 +234,16 @@ export class Interaction {
     }
     if (pressed(3) && p.handedness === 'left') this.onPlace?.();      // linken Stick drücken
 
-    if (p.grab?.type === 'knob' && Math.abs(ax) > 0.15) s.turn(p.grab.plane, ax * 1.2 * dt);
+    if (p.grab?.type === 'knob' && Math.abs(ax) > 0.15) this.turnKnob(p.grab.plane, ax * 1.2 * dt);
     else if (p.grab?.type === 'setup' && Math.abs(ay) > 0.15) this.manip.push(p, ay * 0.8 * dt);
     else if (!p.grab && p.handedness === 'right' && Math.abs(ax) > 0.15) s.setPerspDist(s.perspDist + ax * 2.5 * dt);
 
     p.prevButtons = gp.buttons.map((b) => b.pressed);
   }
 
-  resetPerspective() { this.state.setPerspDist(PERSP_DIST); }
+  /** Drehknopf: Ebene drehen; Falt-Knopf: halbe Umdrehung = ganz auf/zu */
+  turnKnob(plane, rad) {
+    if (plane === 'fold') this.state.turnFold(rad / Math.PI);
+    else this.state.turn(plane, rad);
+  }
 }

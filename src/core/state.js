@@ -2,21 +2,30 @@
 // "version" wird bei jeder Änderung erhöht; Panels zeichnen sich neu, wenn sie sich ändert.
 
 import { identity4, rotatePlane, orthonormalize } from './math4d.js';
-import { PLANES, AUTO_SPEED, PERSP_DIST, PERSP_MIN, PERSP_MAX, MAX_SELECTION } from '../config.js';
+import {
+  PLANES, AUTO_SPEED, PERSP_DIST, PERSP_MIN, PERSP_MAX, MAX_SELECTION, UNFOLD_SPEED,
+} from '../config.js';
+import { SHAPE_BY_ID } from '../shapes/index.js';
 
 export class AppState {
   constructor() {
     this.version = 0;
-    this.viewMode = 'riss';      // 'riss' | 'single'
+    this.shapeId = 'tesseract';
+    this.viewMode = 'riss';      // 'riss' | 'single' | 'unfold'
     this.perspective = true;     // Zentrum perspektivisch (true) oder orthogonal (false)
     this.blend = 1;              // animierter Übergang 0 = orthogonal … 1 = perspektivisch
     this.perspDist = PERSP_DIST;
     this.selection = [];         // markierte Ecken (Indizes), max. MAX_SELECTION
-    this.turning = null;         // Ebene, deren Knopf gerade gehalten wird
+    this.turning = null;         // Knopf, der gerade gehalten wird (Ebenen-Index oder 'fold')
     this.grabbingSetup = false;  // Aufbau wird gerade bewegt
     this.infoPinned = false;     // Info-Panel am Handgelenk dauerhaft zeigen
+    this.unfold = 0;             // Aufklappen: 0 = zu, 1 = ganz offen
+    this.unfoldDir = 1;
+    this.message = null;         // kurze Meldung in der Statuszeile { text, until }
     this.reset();
   }
+
+  get shape() { return SHAPE_BY_ID[this.shapeId]; }
 
   bump() { this.version++; }
 
@@ -37,14 +46,52 @@ export class AppState {
     this.bump();
   }
 
+  turnFold(delta) {
+    this.unfold = Math.min(1, Math.max(0, this.unfold + delta));
+    this.bump();
+  }
+
   toggleAuto() {
-    if (this.activePlane == null) this.activePlane = 2; // XW als Startebene
+    if (this.viewMode !== 'unfold' && this.activePlane == null) this.activePlane = 2; // XW als Startebene
     this.auto = !this.auto;
     this.bump();
   }
 
   togglePerspective() { this.perspective = !this.perspective; this.bump(); }
-  toggleViewMode() { this.viewMode = this.viewMode === 'riss' ? 'single' : 'riss'; this.bump(); }
+
+  setShape(id) {
+    if (id === this.shapeId || !SHAPE_BY_ID[id]) return;
+    this.shapeId = id;
+    this.selection = [];
+    if (this.viewMode === 'unfold' && !this.shape.unfold) {
+      this.viewMode = 'riss';
+      this.flash(`${this.shape.unfoldReason}. Gewechselt zur Rissansicht.`);
+    }
+    this.bump();
+  }
+
+  setViewMode(mode) {
+    if (mode === this.viewMode) return;
+    if (mode === 'unfold') {
+      if (!this.shape.unfold) { this.flash(this.shape.unfoldReason); return; }
+      // Beim Aufklappen nur 3D-Drehungen: 4D-Lage zurücksetzen
+      this.reset();
+      this.perspective = true;
+      this.selection = [];
+    }
+    this.viewMode = mode;
+    this.bump();
+  }
+
+  cycleViewMode() {
+    const order = ['riss', 'single', 'unfold'];
+    let k = order.indexOf(this.viewMode);
+    for (let n = 0; n < 3; n++) {
+      k = (k + 1) % 3;
+      if (order[k] !== 'unfold' || this.shape.unfold) break;
+    }
+    this.setViewMode(order[k]);
+  }
 
   setPerspDist(d) {
     this.perspDist = Math.min(PERSP_MAX, Math.max(PERSP_MIN, d));
@@ -63,6 +110,15 @@ export class AppState {
 
   clearSelection() { this.selection = []; this.bump(); }
 
+  flash(text, ms = 4000) {
+    this.message = { text, until: performance.now() + ms };
+    this.bump();
+  }
+
+  get activeMessage() {
+    return this.message && performance.now() < this.message.until ? this.message.text : null;
+  }
+
   /** Weicher Übergang orthogonal ↔ perspektivisch */
   get easedBlend() {
     const t = this.blend;
@@ -70,13 +126,24 @@ export class AppState {
   }
 
   update(dt) {
-    if (this.auto && this.activePlane != null) this.turn(this.activePlane, AUTO_SPEED * dt);
+    if (this.auto) {
+      if (this.viewMode === 'unfold') {
+        let u = this.unfold + this.unfoldDir * UNFOLD_SPEED * dt;
+        if (u >= 1) { u = 1; this.unfoldDir = -1; }
+        if (u <= 0) { u = 0; this.unfoldDir = 1; }
+        this.unfold = u;
+        this.bump();
+      } else if (this.activePlane != null) {
+        this.turn(this.activePlane, AUTO_SPEED * dt);
+      }
+    }
     const target = this.perspective ? 1 : 0;
     if (this.blend !== target) {
       const step = dt / 0.9;
       this.blend = target > this.blend ? Math.min(target, this.blend + step) : Math.max(target, this.blend - step);
       this.bump();
     }
+    if (this.message && performance.now() >= this.message.until) { this.message = null; this.bump(); }
     orthonormalize(this.M);
   }
 }

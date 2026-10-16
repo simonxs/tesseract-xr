@@ -4,10 +4,11 @@ import * as THREE from 'three';
 import { ARButton } from 'three/addons/webxr/ARButton.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-import { UNIT_RISS, UNIT_SINGLE } from './config.js';
+import { UNIT_RISS, UNIT_SINGLE, UNIT_UNFOLD } from './config.js';
 import { AppState } from './core/state.js';
 import { ViewSet } from './render/views.js';
 import { Links } from './render/links.js';
+import { UnfoldScene } from './render/unfold.js';
 import { Pult } from './ui/pult.js';
 import { StatusLine } from './ui/statusLine.js';
 import { InfoPanel } from './ui/infoPanel.js';
@@ -46,6 +47,12 @@ views.group.scale.setScalar(contentScale);
 
 const links = new Links();
 views.group.add(links.mesh);
+views.setShape(state.shape);
+let shownShape = state.shapeId;
+
+const unfold = new UnfoldScene();
+unfold.group.scale.setScalar(UNIT_UNFOLD);
+setup.add(unfold.group);
 
 const pult = new Pult(state);
 scene.add(pult.root);
@@ -148,19 +155,32 @@ renderer.setAnimationLoop(() => {
   interaction.update(dt);
   state.update(dt);
 
+  if (state.shapeId !== shownShape) {
+    views.setShape(state.shape);
+    shownShape = state.shapeId;
+  }
+
+  // Aufklappen ersetzt die normale Darstellung
+  const unfolding = state.viewMode === 'unfold';
+  views.group.visible = !unfolding;
+  unfold.group.visible = unfolding;
+
   // Inhaltsmaßstab je Ansicht weich überblenden
-  const target = state.viewMode === 'riss' ? UNIT_RISS : UNIT_SINGLE;
+  const target = state.viewMode === 'single' ? UNIT_SINGLE : UNIT_RISS;
   contentScale += (target - contentScale) * Math.min(1, dt * 6);
   views.group.scale.setScalar(contentScale);
 
-  views.update(state, interaction.hover);
-  links.update(state, views);
+  if (unfolding) unfold.update(state);
+  else {
+    views.update(state, interaction.hover);
+    links.update(state, views);
+  }
   setup.updateMatrixWorld();
 
   camera.getWorldPosition(_head);
 
   // Statuszeile unter dem Aufbau, feste Größe, zur Kamera gedreht
-  _v.set(0, -contentScale * 3.1, 0);
+  _v.set(0, unfolding ? -UNIT_UNFOLD * 4.4 : -contentScale * 3.1, 0);
   setup.localToWorld(_v);
   _v.y -= 0.035;
   status.panel.mesh.position.copy(_v);
@@ -187,4 +207,4 @@ renderer.setAnimationLoop(() => {
 });
 
 // Für Tests und eigene Experimente in der Browser-Konsole
-window.__tesseract = { state, views, setup, scene, camera, renderer };
+window.__tesseract = { state, views, unfold, setup, scene, camera, renderer };
