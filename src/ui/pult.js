@@ -21,7 +21,9 @@ const KNOBS = [
   { plane: 2, x: 110, y: ROW1 }, { plane: 4, x: 310, y: ROW1 }, { plane: 5, x: 510, y: ROW1 },
   { plane: 'fold', x: 310, y: ROW1 },
 ];
-const SHAPE_CHIPS = SHAPES.map((s, k) => ({ group: 'shape', id: s.id, label: s.label, x: 150 + k * 174, y: 22, w: 166, h: 52 }));
+// Breite der Form-Felder passt sich der Anzahl an (Platz von x = 150 bis 1012)
+const CHIP_STEP = Math.floor(870 / SHAPES.length);
+const SHAPE_CHIPS = SHAPES.map((s, k) => ({ group: 'shape', id: s.id, label: s.label, x: 150 + k * CHIP_STEP, y: 22, w: CHIP_STEP - 8, h: 52 }));
 const VIEW_CHIPS = VIEW_MODES.map((v, k) => ({ group: 'view', id: v.id, label: t(`view.${v.id}`), x: 150 + k * 228, y: 86, w: 220, h: 52 }));
 const CHIPS = [...SHAPE_CHIPS, ...VIEW_CHIPS];
 const BTN_X = 660, BTN_W = 332, BTN_H = 76;
@@ -160,7 +162,8 @@ export class Pult {
       ctx.strokeStyle = active ? UI.accent : UI.line;
       ctx.lineWidth = 2;
       ctx.stroke();
-      ctx.font = `600 24px ${FONT}`;
+      let fs = 24;
+      do { ctx.font = `600 ${fs}px ${FONT}`; fs -= 1; } while (ctx.measureText(c.label).width > c.w - 16 && fs > 14);
       ctx.fillStyle = enabled ? UI.text : 'rgba(233,237,243,0.32)';
       ctx.textAlign = 'center';
       ctx.fillText(c.label, c.x + c.w / 2, c.y + c.h / 2 + 1);

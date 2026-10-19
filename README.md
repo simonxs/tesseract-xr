@@ -4,7 +4,7 @@
 
 An interactive way to explore the fourth dimension on the **Meta Quest 3 in AR (passthrough) mode**, built with WebXR and three.js. You turn 4D shapes with rotary knobs in the 6 planes of 4D space, see them in a **multi-view projection** like an engineering drawing, and can **unfold** the tesseract the way you unfold a cube.
 
-Version 3 · October 2026 · Live: https://tesseract-xr.okercode.de
+Version 4 · October 2026 · Live: https://tesseract-xr.okercode.de
 
 A non-commercial project driven by academic curiosity: how can the fourth dimension be made tangible? The visualizations are meant for learning and understanding.
 
@@ -14,6 +14,7 @@ A non-commercial project driven by academic curiosity: how can the fourth dimens
 
 | Version | Contents |
 |---|---|
+| 4 | New shape: wormhole (embedding diagram) |
 | 3 | English version (picked from the browser language, switchable), new shape order: 3D cube, 4D cube, 3D sphere, 4D sphere, 3D car; three.js served locally (no third-party requests), legal links, MIT license |
 | 2 | Shape selection, unfold mode (cube → cross, tesseract → Dalí cross), edges as square beams, favicon |
 | 1 | Tesseract, multi-view, 6 rotary knobs, reference lines, legend and rotation matrix, grab and zoom |
@@ -47,6 +48,9 @@ The header of the control desk has two rows: **Shape** and **View**. Not every c
 | 3D sphere (at w = 0) | ✓ | ✓ | – | Turns into a disc in XW; after 180° it looks unchanged, because a sphere is its own mirror image |
 | 4D sphere | ✓ | ✓ | – | One great circle per rotation plane: the circle of the active plane spins in place, the circle of the fixed plane stands still |
 | 3D car (at w = 0) | ✓ | ✓ | – | **Mirrored after 180° in XW**: steering wheel on the right, licence plate reversed |
+| Wormhole | ✓ | ✓ | – | Curved space as an embedding diagram: the side views show the familiar funnel, the perspective center shows both sides as nested shells |
+
+**About the wormhole:** it is an *embedding diagram* of an Ellis wormhole. A curved 3D space is drawn as a hypersurface in 4D, with each spherical shell of radius r at w = ±b·arcosh(r/b). Here W is only an auxiliary dimension that makes the curvature visible; it is not a direction you could travel in. The two sheets (teal and orange) are the two sides, joined at the gold throat. In the side views W takes the place of a spatial axis, and the shells stack up into the funnel known from textbooks.
 
 ### Unfold
 
@@ -168,6 +172,7 @@ src/
     tesseract.js        16 vertices, 32 edges (colored by axis)
     spheres.js          3D sphere and 4D sphere as circle grids
     car.js              convertible made of primitives (surface model, textured plate)
+    wormhole.js         wormhole as an embedding diagram (4D catenoid)
     index.js            list of shapes in desk order
   render/
     batches.js          instanced beams/tubes, spheres, dynamic quads

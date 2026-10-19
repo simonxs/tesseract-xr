@@ -4,7 +4,7 @@
 
 Interaktive Darstellung der vierten Dimension für die **Meta Quest 3 im AR-Modus (Passthrough)**, gebaut mit WebXR und three.js. Man dreht 4D-Formen mit Drehknöpfen in den 6 Ebenen des 4D-Raums, sieht sie in einer **Rissansicht** wie auf einem Bauplan und kann den Tesseract wie einen Würfel **aufklappen**.
 
-Version 3 · Stand Oktober 2026 · Live: https://tesseract-xr.okercode.de
+Version 4 · Stand Oktober 2026 · Live: https://tesseract-xr.okercode.de
 
 Ein nicht-kommerzielles Projekt aus akademischem Interesse: Wie lässt sich die vierte Dimension anschaulich machen? Die Darstellungen dienen dem Lernen und Verstehen.
 
@@ -14,6 +14,7 @@ Ein nicht-kommerzielles Projekt aus akademischem Interesse: Wie lässt sich die 
 
 | Version | Inhalt |
 |---|---|
+| 4 | Neue Form: Wurmloch (Einbettungsdiagramm) |
 | 3 | Englische Sprachversion (automatisch nach Browsersprache, umschaltbar), neue Reihenfolge der Formen: 3D-Würfel, 4D-Würfel, 3D-Kugel, 4D-Kugel, 3D-Auto; three.js lokal ausgeliefert (keine Anfragen an Dritte), Impressum-/Datenschutz-Links, MIT-Lizenz |
 | 2 | Formen-Auswahl (Tesseract, 3D-Würfel, 3D-Kugel, 4D-Kugel, Auto), Aufklapp-Modus (Würfel → Kreuz, Tesseract → Dalí-Kreuz), Kanten als 4-kantige Leisten, Favicon |
 | 1 | Tesseract, Rissansicht, 6 Drehknöpfe, Ordnungslinien, Legende und Drehmatrix, Greifen und Zoomen |
@@ -48,6 +49,9 @@ Am Pult wählt man oben in der Kopfzeile **Form** und **Ansicht**. Nicht jede Ko
 | 3D-Kugel (bei w = 0) | ✓ | ✓ | – | wird bei XW zur Scheibe; nach 180° unverändert, weil sie ihr eigenes Spiegelbild ist |
 | 4D-Kugel | ✓ | ✓ | – | ein Großkreis pro Drehebene: der Kreis der aktiven Ebene kreist in sich, der Kreis der festen Ebene steht still |
 | 3D-Auto (bei w = 0) | ✓ | ✓ | – | **nach 180° in XW gespiegelt**: Lenkrad rechts, Kennzeichen spiegelverkehrt |
+| Wurmloch | ✓ | ✓ | – | gekrümmter Raum als Einbettungsdiagramm: die Seitenansichten zeigen den bekannten Trichter, das perspektivische Zentrum beide Seiten als ineinanderliegende Schalen |
+
+**Zum Wurmloch:** Es ist ein *Einbettungsdiagramm* eines Ellis-Wurmlochs. Ein gekrümmter 3D-Raum wird als Hyperfläche im 4D-Raum gezeichnet; jede Kugelschale mit Radius r liegt bei w = ±b·arcosh(r/b). W ist hier nur eine Hilfsdimension, die die Krümmung sichtbar macht, keine Richtung, in die man reisen könnte. Die beiden Blätter (türkis und orange) sind die beiden Seiten, verbunden am goldenen Schlund. In den Seitenansichten rückt W an die Stelle einer Raumachse, und die Schalen stapeln sich zum Trichter aus den Lehrbüchern.
 
 ### Kanten als Leisten
 
@@ -170,6 +174,7 @@ src/
     cube3d.js           3D-Würfel bei w = 0
     spheres.js          3D-Kugel und 4D-Kugel als Kreisnetz
     car.js              Cabrio aus Grundformen (Flächenmodell, Kennzeichen mit Textur)
+    wormhole.js         Wurmloch als Einbettungsdiagramm (4D-Katenoid)
     index.js            Liste aller Formen
   render/
     batches.js          instanzierte Leisten/Rohre, Kugeln, dynamische Vierecke

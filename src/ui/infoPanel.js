@@ -81,7 +81,11 @@ export class InfoPanel {
     if (state.shape.selectable) {
       richText(ctx, [{ t: t('info.marked') }, ...SEL_CSS.map((c) => ({ t: '● ', c }))], 36, 282, 'left', `500 22px ${FONT}`);
     } else {
-      richText(ctx, [{ t: state.shape.hint, c: UI.dim }], 36, 282, 'left', `500 20px ${FONT}`);
+      // Hinweis bei " · " auf höchstens zwei Zeilen umbrechen
+      const parts = state.shape.hint.split(' · ');
+      parts.slice(0, 2).forEach((line, k) => {
+        richText(ctx, [{ t: line, c: UI.dim }], 36, parts.length > 1 ? 272 + k * 26 : 282, 'left', `500 19px ${FONT}`);
+      });
     }
   }
 
