@@ -10,6 +10,7 @@ import { ViewSet } from './render/views.js';
 import { Links } from './render/links.js';
 import { UnfoldScene } from './render/unfold.js';
 import { Pult } from './ui/pult.js';
+import { Shelf } from './ui/shelf.js';
 import { StatusLine } from './ui/statusLine.js';
 import { InfoPanel } from './ui/infoPanel.js';
 import { VertexLabels } from './ui/vertexLabels.js';
@@ -62,6 +63,9 @@ setup.add(unfold.group);
 const pult = new Pult(state);
 scene.add(pult.root);
 
+const shelf = new Shelf(state);
+scene.add(shelf.root);
+
 const status = new StatusLine();
 scene.add(status.panel.mesh);
 
@@ -81,6 +85,8 @@ function desktopLayout() {
   setup.scale.setScalar(1);
   pult.root.position.set(0.05, 1.0, -0.22);
   pult.root.rotation.set(0, 0, 0);
+  shelf.root.position.set(-0.7, 1.02, -0.42);
+  shelf.root.rotation.set(0, 0.7, 0);
   scene.add(info.mesh);
   info.mesh.position.set(-0.36, 1.36, -0.5);
   info.mesh.rotation.set(0, 0.5, 0);
@@ -110,6 +116,11 @@ function placeInFront() {
   pult.root.position.copy(_head).addScaledVector(_dir, 0.42);
   pult.root.position.y = _head.y - 0.42;
   pult.root.rotation.set(0, yaw, 0);
+  // Regal links vorn, zum Kopf gedreht
+  const left = new THREE.Vector3(_dir.z, 0, -_dir.x); // 90° links von der Blickrichtung
+  shelf.root.position.copy(_head).addScaledVector(_dir, 0.5).addScaledVector(left, 0.45);
+  shelf.root.position.y = _head.y - 0.45;
+  shelf.root.rotation.set(0, Math.atan2(_head.x - shelf.root.position.x, _head.z - shelf.root.position.z), 0);
 }
 
 function attachInfoToWrist(p) {
@@ -123,7 +134,7 @@ function attachInfoToWrist(p) {
 
 // ---------- Eingabe ----------
 const interaction = new Interaction({
-  renderer, camera, scene, state, views, pult, setup, orbit, onPlace: placeInFront,
+  renderer, camera, scene, state, views, pult, shelf, setup, orbit, onPlace: placeInFront,
 });
 interaction.onConnected = attachInfoToWrist;
 
@@ -193,6 +204,7 @@ renderer.setAnimationLoop(() => {
   status.update(state, interaction.hover, setup.scale.x);
 
   pult.update(interaction.hover);
+  shelf.update(dt, interaction.hover);
   labels.update(state, views);
   info.update(state);
 

@@ -7,6 +7,7 @@
 //   edgeScale           Faktor für die Kantenstärke (dünner bei Kugeln)
 //   showPoints          Ecken als Kugeln zeichnen
 //   selectable          Ecken antippen/markieren möglich (mit Ordnungslinien)
+//   pointCount          optional: nur die ersten n Ecken zeichnen/anwählen (Rest = Hilfspunkte)
 //   unfold              Aufklappen möglich
 //   unfoldReason        Text, falls Aufklappen nicht geht
 //   mesh                optional: Flächen-Teile (siehe car.js), werden mitgedreht und projiziert

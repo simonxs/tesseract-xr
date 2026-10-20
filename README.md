@@ -4,7 +4,7 @@
 
 An interactive way to explore the fourth dimension on the **Meta Quest 3 in AR (passthrough) mode**, built with WebXR and three.js. You turn 4D shapes with rotary knobs in the 6 planes of 4D space, see them in a **multi-view projection** like an engineering drawing, and can **unfold** the tesseract the way you unfold a cube.
 
-Version 4 · October 2026 · Live: https://tesseract-xr.okercode.de
+Version 5 · October 2026 · Live: https://tesseract-xr.okercode.de
 
 A non-commercial project driven by academic curiosity: how can the fourth dimension be made tangible? The visualizations are meant for learning and understanding.
 
@@ -14,6 +14,7 @@ A non-commercial project driven by academic curiosity: how can the fourth dimens
 
 | Version | Contents |
 |---|---|
+| 5 | Shape shelf with miniatures in compartments (the desk is now for controls only), new shapes: 16-cell, 24-cell, duoprism, Klein bottle |
 | 4 | New shape: wormhole (embedding diagram) |
 | 3 | English version (picked from the browser language, switchable), new shape order: 3D cube, 4D cube, 3D sphere, 4D sphere, 3D car; three.js served locally (no third-party requests), legal links, MIT license |
 | 2 | Shape selection, unfold mode (cube → cross, tesseract → Dalí cross), edges as square beams, favicon |
@@ -39,7 +40,7 @@ Double-clicking `index.html` does not work, because browsers block ES modules on
 
 ## What you see
 
-The header of the control desk has two rows: **Shape** and **View**. Not every combination makes sense; greyed-out options explain why in the status line.
+Shapes are picked on the **shelf** to the left: a small cabinet with one board per group and a compartment per shape, each holding a slowly turning miniature. Point at a compartment and press. The control desk shows the current shape and picks the **view**; greyed-out views explain in the status line why they are not available.
 
 | Shape | Multi-view | Shape only | Unfold | What it teaches |
 |---|---|---|---|---|
@@ -48,6 +49,10 @@ The header of the control desk has two rows: **Shape** and **View**. Not every c
 | 3D sphere (at w = 0) | ✓ | ✓ | – | Turns into a disc in XW; after 180° it looks unchanged, because a sphere is its own mirror image |
 | 4D sphere | ✓ | ✓ | – | One great circle per rotation plane: the circle of the active plane spins in place, the circle of the fixed plane stands still |
 | 3D car (at w = 0) | ✓ | ✓ | – | **Mirrored after 180° in XW**: steering wheel on the right, licence plate reversed |
+| 16-cell | ✓ | ✓ | – | The counterpart of the 4D cube: 8 vertices on the axes. Every edge lies in one rotation plane and is drawn in its two axis colors |
+| 24-cell | ✓ | ✓ | – | The only regular solid that exists **only in 4D**: 24 vertices, 96 edges, 24 octahedral cells |
+| Duoprism (hexagon × hexagon) | ✓ | ✓ | – | One hexagon in XY, one in ZW: the XY knob turns only one, the ZW knob only the other; both together give the **double rotation** that does not exist in 3D |
+| Klein bottle | ✓ | ✓ | – | Must intersect itself in 3D, but not in 4D: color shows w, and wherever the 3D shape crosses itself the two parts differ in w (lifted with w = 0.6·sin 2u) |
 | Wormhole | ✓ | ✓ | – | Curved space as an embedding diagram: the side views show the familiar funnel, the perspective center shows both sides as nested shells |
 
 **About the wormhole:** it is an *embedding diagram* of an Ellis wormhole. A curved 3D space is drawn as a hypersurface in 4D, with each spherical shell of radius r at w = ±b·arcosh(r/b). Here W is only an auxiliary dimension that makes the curvature visible; it is not a direction you could travel in. The two sheets (teal and orange) are the two sides, joined at the gold throat. In the side views W takes the place of a spatial axis, and the shells stack up into the funnel known from textbooks.
@@ -172,8 +177,10 @@ src/
     tesseract.js        16 vertices, 32 edges (colored by axis)
     spheres.js          3D sphere and 4D sphere as circle grids
     car.js              convertible made of primitives (surface model, textured plate)
+    polytopes.js        16-cell, 24-cell, duoprism (two-colored edges per rotation plane)
+    klein.js            Klein bottle, lifted into 4D without self-intersection
     wormhole.js         wormhole as an embedding diagram (4D catenoid)
-    index.js            list of shapes in desk order
+    index.js            shape groups = shelf boards
   render/
     batches.js          instanced beams/tubes, spheres, dynamic quads
     views.js            center + 3 side views for the chosen shape, vertex picking
@@ -182,7 +189,8 @@ src/
     unfold.js           unfolding: cube with sheet and shadow, tesseract as Dalí cross
   ui/
     canvasPanel.js      canvas texture on a plane/sprite, text helpers, UI colors
-    pult.js             control desk with header, knobs and buttons
+    pult.js             control desk: view, knobs and buttons
+    shelf.js            shape shelf with miniatures
     statusLine.js       status line
     infoPanel.js        legend + rotation matrix
     vertexLabels.js     coordinate tooltips
@@ -223,7 +231,7 @@ renderer.render
 | change texts, add a language | `i18n.js`: add a block with the same keys; missing keys fall back to English |
 | new button | `Pult.buttons` (label) + `Pult.action` + a method in `AppState` |
 | new view (e.g. a slicing mode) | a new module in `render/` following `views.js`, hooked into `main.js`, a new value for `state.viewMode` |
-| new shape (e.g. 16-cell, 24-cell, cube pyramid) | a file in `src/shapes/` following the format in `common.js`, added to `shapes/index.js`; it appears on the desk automatically |
+| new shape (e.g. 5-cell, cube pyramid, trefoil knot) | a file in `src/shapes/` following the format in `common.js`, added to a group in `shapes/index.js`; it gets a compartment on the shelf automatically (4 per board) |
 | other input | `Interaction.press/release/update`; pointers only provide a ray and a quaternion |
 
 ### Roadmap
@@ -231,7 +239,7 @@ renderer.render
 1. **Guided tour:** 6 chapters as presets, each with one task in the status line
 2. Hints at special moments (e.g. at 90°: “X and W have swapped”), selecting individual cells
 3. Slicing mode (3D cross-section at w = c, ideal for the 4D sphere), turning the tesseract directly with your hands
-4. More shapes: cube pyramid, duoprism, 16-cell, 24-cell
+4. More shapes: 5-cell, cube pyramid, Möbius strip, trefoil knot that unties in 4D
 
 ### Known limitations
 

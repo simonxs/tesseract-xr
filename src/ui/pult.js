@@ -7,7 +7,6 @@
 
 import * as THREE from 'three';
 import { PLANES, AXES, AXIS_COLORS, AXIS_CSS, VIEW_MODES, ROLE_COLORS } from '../config.js';
-import { SHAPES } from '../shapes/index.js';
 import { fmtDeg } from '../core/math4d.js';
 import { CanvasPanel, panelBg, richText, FONT, UI } from './canvasPanel.js';
 import { t } from '../i18n.js';
@@ -21,11 +20,9 @@ const KNOBS = [
   { plane: 2, x: 110, y: ROW1 }, { plane: 4, x: 310, y: ROW1 }, { plane: 5, x: 510, y: ROW1 },
   { plane: 'fold', x: 310, y: ROW1 },
 ];
-// Breite der Form-Felder passt sich der Anzahl an (Platz von x = 150 bis 1012)
-const CHIP_STEP = Math.floor(870 / SHAPES.length);
-const SHAPE_CHIPS = SHAPES.map((s, k) => ({ group: 'shape', id: s.id, label: s.label, x: 150 + k * CHIP_STEP, y: 22, w: CHIP_STEP - 8, h: 52 }));
+// Formen werden im Regal gewählt (ui/shelf.js); hier nur die Ansicht
 const VIEW_CHIPS = VIEW_MODES.map((v, k) => ({ group: 'view', id: v.id, label: t(`view.${v.id}`), x: 150 + k * 228, y: 86, w: 220, h: 52 }));
-const CHIPS = [...SHAPE_CHIPS, ...VIEW_CHIPS];
+const CHIPS = VIEW_CHIPS;
 const BTN_X = 660, BTN_W = 332, BTN_H = 76;
 
 export class Pult {
@@ -151,6 +148,8 @@ export class Pult {
     ctx.font = `600 22px ${FONT}`;
     ctx.fillStyle = UI.dim;
     ctx.fillText(t('pult.shape'), 34, 48);
+    richText(ctx, [{ t: s.shape.label, c: UI.accent, f: `700 28px ${FONT}` }, { t: `  ·  ${t('pult.onShelf')}`, c: UI.dim }],
+      150, 48, 'left', `500 22px ${FONT}`);
     ctx.fillText(t('pult.view'), 34, 112);
     for (const c of CHIPS) {
       const active = this.chipActive(c), enabled = this.chipEnabled(c);

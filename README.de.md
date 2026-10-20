@@ -4,7 +4,7 @@
 
 Interaktive Darstellung der vierten Dimension für die **Meta Quest 3 im AR-Modus (Passthrough)**, gebaut mit WebXR und three.js. Man dreht 4D-Formen mit Drehknöpfen in den 6 Ebenen des 4D-Raums, sieht sie in einer **Rissansicht** wie auf einem Bauplan und kann den Tesseract wie einen Würfel **aufklappen**.
 
-Version 4 · Stand Oktober 2026 · Live: https://tesseract-xr.okercode.de
+Version 5 · Stand Oktober 2026 · Live: https://tesseract-xr.okercode.de
 
 Ein nicht-kommerzielles Projekt aus akademischem Interesse: Wie lässt sich die vierte Dimension anschaulich machen? Die Darstellungen dienen dem Lernen und Verstehen.
 
@@ -14,6 +14,7 @@ Ein nicht-kommerzielles Projekt aus akademischem Interesse: Wie lässt sich die 
 
 | Version | Inhalt |
 |---|---|
+| 5 | Formen-Regal mit Modellen in Fächern (das Pult dient nur noch der Steuerung), neue Formen: 16-Zeller, 24-Zeller, Duoprisma, Kleinsche Flasche |
 | 4 | Neue Form: Wurmloch (Einbettungsdiagramm) |
 | 3 | Englische Sprachversion (automatisch nach Browsersprache, umschaltbar), neue Reihenfolge der Formen: 3D-Würfel, 4D-Würfel, 3D-Kugel, 4D-Kugel, 3D-Auto; three.js lokal ausgeliefert (keine Anfragen an Dritte), Impressum-/Datenschutz-Links, MIT-Lizenz |
 | 2 | Formen-Auswahl (Tesseract, 3D-Würfel, 3D-Kugel, 4D-Kugel, Auto), Aufklapp-Modus (Würfel → Kreuz, Tesseract → Dalí-Kreuz), Kanten als 4-kantige Leisten, Favicon |
@@ -40,7 +41,7 @@ Einfach die `index.html` per Doppelklick zu öffnen funktioniert nicht, weil ES-
 
 ## Was man sieht
 
-Am Pult wählt man oben in der Kopfzeile **Form** und **Ansicht**. Nicht jede Kombination ist sinnvoll; ausgegraute Felder erklären in der Statuszeile, warum.
+Formen wählt man im **Regal** links: ein kleiner Schrank mit einem Boden pro Gruppe und einem Fach pro Form, in dem sich ein Modell langsam dreht. Auf ein Fach zeigen und drücken. Das Pult zeigt die aktuelle Form und wählt die **Ansicht**; ausgegraute Ansichten erklären in der Statuszeile, warum sie nicht gehen.
 
 | Form | Rissansicht | nur Form | Aufklappen | Was man daran lernt |
 |---|---|---|---|---|
@@ -49,6 +50,10 @@ Am Pult wählt man oben in der Kopfzeile **Form** und **Ansicht**. Nicht jede Ko
 | 3D-Kugel (bei w = 0) | ✓ | ✓ | – | wird bei XW zur Scheibe; nach 180° unverändert, weil sie ihr eigenes Spiegelbild ist |
 | 4D-Kugel | ✓ | ✓ | – | ein Großkreis pro Drehebene: der Kreis der aktiven Ebene kreist in sich, der Kreis der festen Ebene steht still |
 | 3D-Auto (bei w = 0) | ✓ | ✓ | – | **nach 180° in XW gespiegelt**: Lenkrad rechts, Kennzeichen spiegelverkehrt |
+| 16-Zeller | ✓ | ✓ | – | Gegenstück zum 4D-Würfel: 8 Ecken auf den Achsen. Jede Kante liegt in einer Drehebene und trägt deren zwei Achsenfarben |
+| 24-Zeller | ✓ | ✓ | – | Der einzige regelmäßige Körper, den es **nur in 4D** gibt: 24 Ecken, 96 Kanten, 24 Oktaeder als Zellen |
+| Duoprisma (Sechseck × Sechseck) | ✓ | ✓ | – | Ein Sechseck in XY, eines in ZW: der XY-Knopf dreht nur das eine, der ZW-Knopf nur das andere; beide zusammen ergeben die **doppelte Drehung**, die es in 3D nicht gibt |
+| Kleinsche Flasche | ✓ | ✓ | – | Muss sich in 3D selbst durchdringen, in 4D nicht: Die Farbe zeigt w, und wo sich die 3D-Form kreuzt, haben die beiden Teile verschiedenes w (angehoben mit w = 0,6·sin 2u) |
 | Wurmloch | ✓ | ✓ | – | gekrümmter Raum als Einbettungsdiagramm: die Seitenansichten zeigen den bekannten Trichter, das perspektivische Zentrum beide Seiten als ineinanderliegende Schalen |
 
 **Zum Wurmloch:** Es ist ein *Einbettungsdiagramm* eines Ellis-Wurmlochs. Ein gekrümmter 3D-Raum wird als Hyperfläche im 4D-Raum gezeichnet; jede Kugelschale mit Radius r liegt bei w = ±b·arcosh(r/b). W ist hier nur eine Hilfsdimension, die die Krümmung sichtbar macht, keine Richtung, in die man reisen könnte. Die beiden Blätter (türkis und orange) sind die beiden Seiten, verbunden am goldenen Schlund. In den Seitenansichten rückt W an die Stelle einer Raumachse, und die Schalen stapeln sich zum Trichter aus den Lehrbüchern.
@@ -174,8 +179,10 @@ src/
     cube3d.js           3D-Würfel bei w = 0
     spheres.js          3D-Kugel und 4D-Kugel als Kreisnetz
     car.js              Cabrio aus Grundformen (Flächenmodell, Kennzeichen mit Textur)
+    polytopes.js        16-Zeller, 24-Zeller, Duoprisma (zweifarbige Kanten je Drehebene)
+    klein.js            Kleinsche Flasche, in 4D ohne Selbstdurchdringung
     wormhole.js         Wurmloch als Einbettungsdiagramm (4D-Katenoid)
-    index.js            Liste aller Formen
+    index.js            Formen-Gruppen = Regalböden
   render/
     batches.js          instanzierte Leisten/Rohre, Kugeln, dynamische Vierecke
     views.js            Zentrum + 3 Seitenansichten für die gewählte Form, Ecken-Picking
@@ -184,7 +191,8 @@ src/
     unfold.js           Aufklappen: Würfel mit Blatt und Schatten, Tesseract als Dalí-Kreuz
   ui/
     canvasPanel.js      Canvas-Textur als Fläche/Sprite, Text-Helfer, UI-Farben
-    pult.js             Bedienpult mit 6 Knöpfen und Schaltflächen
+    pult.js             Bedienpult: Ansicht, Knöpfe, Schaltflächen
+    shelf.js            Formen-Regal mit Modellen
     statusLine.js       Statuszeile
     infoPanel.js        Legende + Drehmatrix
     vertexLabels.js     Koordinaten-Tooltips
@@ -222,7 +230,7 @@ renderer.render
 | Texte ändern, neue Sprache | `i18n.js`: Block mit denselben Schlüsseln anlegen; fehlende Schlüssel fallen auf Englisch zurück |
 | Neue Schaltfläche | `Pult.buttons` (Beschriftung) + `Pult.action` + Methode in `AppState` |
 | Neue Darstellung (z. B. Schnitt-Modus) | neues Modul in `render/` nach dem Muster von `views.js`, in `main.js` einhängen, Moduswert in `state.viewMode` |
-| Neue Form (z. B. 16-Zeller, 24-Zeller, Würfelpyramide) | Datei in `src/shapes/` nach dem Format in `common.js`, in `shapes/index.js` eintragen. Sie erscheint automatisch am Pult. |
+| Neue Form (z. B. 5-Zeller, Würfelpyramide, Kleeblattknoten) | Datei in `src/shapes/` nach dem Format in `common.js`, in `shapes/index.js` einer Gruppe zuordnen. Sie bekommt automatisch ein Fach im Regal (4 pro Boden). |
 | Weitere Eingabe | `Interaction.press/release/update`; Zeiger liefern nur einen Strahl und ein Quaternion |
 
 ### Geplante Ausbaustufen
@@ -230,7 +238,7 @@ renderer.render
 1. **Geführte Tour:** 6 Kapitel als Voreinstellungen mit je einer Aufgabe in der Statuszeile
 2. Hinweise bei besonderen Momenten (z. B. bei 90°: „X und W haben getauscht“), Zellen einzeln anwählen
 3. Schnitt-Modus (3D-Querschnitt bei w = c, ideal für die 4D-Kugel), Tesseract direkt mit den Händen drehen
-4. Weitere Formen: Würfelpyramide, Duoprisma, 16-Zeller, 24-Zeller
+4. Weitere Formen: 5-Zeller, Würfelpyramide, Möbiusband, Kleeblattknoten, der sich in 4D löst
 
 ### Bekannte Grenzen
 

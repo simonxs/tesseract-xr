@@ -145,10 +145,13 @@ export class Interaction {
 
   // ---------- Logik ----------
   pick(p) {
-    const ph = this.pult.hit(p.ray);
-    const vh = this.views.pickVertex(p.ray, this.state.viewMode === 'riss');
-    if (ph && vh) return ph.distance <= vh.distance ? ph : vh;
-    return ph || vh;
+    const hits = [
+      this.pult.hit(p.ray),
+      this.shelf?.hit(p.ray),
+      this.views.pickVertex(p.ray, this.state.viewMode === 'riss'),
+    ].filter(Boolean);
+    hits.sort((a, b) => a.distance - b.distance);
+    return hits[0] || null;
   }
 
   press(p) {
@@ -168,6 +171,8 @@ export class Interaction {
       s.turning = t.plane;
       if (t.plane !== 'fold') s.activePlane = t.plane;
       s.bump();
+    } else if (t.type === 'shelf') {
+      s.setShape(t.id);
     } else if (t.type === 'button' || t.type === 'chip') {
       this.pult.action(t);
     } else if (t.type === 'vertex') {

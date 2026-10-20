@@ -84,6 +84,7 @@ export class StatusLine {
       if (hover.group === 'shape') return [{ t: t('st.shapeChip', { l: SHAPE_BY_ID[hover.id].label }), c: UI.dim }];
       return [{ t: t('st.viewChip', { l: t(`view.${hover.id}`) }), c: UI.dim }];
     }
+    if (hover?.type === 'shelf') return [{ t: t('st.shelf', { l: SHAPE_BY_ID[hover.id].label }), c: UI.dim }];
     if (hover?.type === 'button') return [{ t: t('st.button'), c: UI.dim }];
     if (state.viewMode === 'unfold') return [{ t: t('st.unfoldIdle'), c: UI.dim }];
     if (state.shape.selectable) return [{ t: t('st.selectIdle'), c: UI.dim }];

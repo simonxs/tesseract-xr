@@ -114,7 +114,7 @@ export class ViewSet {
     this.points.begin();
     if (shape.showPoints) {
       for (const P of views) {
-        for (let i = 0; i < V.length; i++) {
+        for (let i = 0; i < (shape.pointCount ?? V.length); i++) {
           const s = state.selection.indexOf(i);
           const hov = hover && hover.type === 'vertex' && hover.i === i;
           const col = s >= 0 ? SEL_COL[s] : hov ? HOVER_COL : V_COL;
@@ -158,7 +158,7 @@ export class ViewSet {
     let best = null, bestT = Infinity;
     const tmp = new THREE.Vector3();
     for (const P of views) {
-      for (let i = 0; i < P.length; i++) {
+      for (let i = 0; i < (this.shape.pointCount ?? P.length); i++) {
         if (local.distanceSqToPoint(P[i]) > thr * thr) continue;
         const tt = tmp.subVectors(P[i], local.origin).dot(local.direction);
         if (tt > 0 && tt < bestT) {
